@@ -1,0 +1,107 @@
+#ifndef ROBOTIC_ARM_STEPPER_HPP
+#define ROBOTIC_ARM_STEPPER_HPP
+
+#include "CANComms.hpp"
+
+#include <cstdint>
+#include <vector>
+#include <stdexcept>
+
+class StepperMotor
+{
+public:
+    StepperMotor(int CAN_id, CANComms &comms)
+        : CAN_id_(CAN_id), comms_(comms) {}
+
+    // Send command in speed mode (F6)
+    bool send_speed(uint16_t rpm, uint8_t acc, bool clockwise = true)
+    {
+        if (rpm > 3000) rpm = 3000;
+
+        uint8_t dir = clockwise ? 0x00 : 0x80; // bit7 = 1 for CCW, 0 for CW
+        uint8_t high = ((rpm >> 8) & 0x0F);
+        uint8_t low = rpm & 0xFF;
+        uint8_t byte2 = dir | high;
+        uint8_t byte3 = low;
+
+        std::vector<uint8_t> payload = {0xF6, byte2, byte3, acc};
+        return comms_.send_with_crc(CAN_id_, payload);
+    }
+
+    // Send command in position mode 4 (F5) - absolute motion by axis
+    bool send_absolute_position(int32_t abs_axis, uint16_t rpm, uint8_t acc)
+    {
+        if (rpm > 3000) rpm = 3000;
+        if (abs_axis < -8388607) abs_axis = -8388607;
+        if (abs_axis > 8388607) abs_axis = 8388607;
+
+        std::vector<uint8_t> payload = {0xF5};
+        payload.push_back((rpm >> 8) & 0xFF);
+        payload.push_back(rpm & 0xFF);
+        payload.push_back(acc);
+
+        // 24-bit signed int for abs_axis (little-endian)
+        payload.push_back(abs_axis & 0xFF);
+        payload.push_back((abs_axis >> 8) & 0xFF);
+        payload.push_back((abs_axis >> 16) & 0xFF);
+
+        return comms_.send_with_crc(CAN_id_, payload);
+    }
+
+    // Query speed (command 0x32)
+    int16_t read_speed()
+    {
+        std::vector<uint8_t> query = {0x32};
+        comms_.send_with_crc(CAN_id_, query);
+
+        struct can_frame response;
+        if (comms_.receive_frame(response))
+        {
+            if (response.data[0] == 0x32)
+            {
+                int16_t speed = response.data[1] | (response.data[2] << 8);
+                return speed;
+            }
+        }
+        throw std::runtime_error("Failed to read speed");
+    }
+
+    // Query encoder position (command 0x31)
+    int64_t read_encoder_position()
+    {
+        std::vector<uint8_t> query = {0x31};
+        comms_.send_with_crc(CAN_id_, query);
+
+        struct can_frame response;
+        if (comms_.receive_frame(response))
+        {
+            if (response.data[0] == 0x31)
+            {
+                int64_t pos = 0;
+                for (int i = 5; i >= 1; --i)
+                {
+                    pos = (pos << 8) | response.data[i];
+                }
+                return pos;
+            }
+        }
+        throw std::runtime_error("Failed to read encoder position");
+    }
+
+    bool set_microsteps(uint8_t microstep_value)
+    {
+        if (microstep_value == 0) {
+            std::cerr << "[StepperMotor] Invalid microstep value: 0\n";
+            return false;
+        }
+
+        std::vector<uint8_t> payload = {0x84, microstep_value};
+        return comms_.send_frame(CAN_id_, append_crc(CAN_id_, payload));
+    }
+
+private:
+    uint8_t CAN_id_;
+    CANComms &comms_;
+};
+
+#endif // ROBOTIC_ARM_STEPPER_HPP
