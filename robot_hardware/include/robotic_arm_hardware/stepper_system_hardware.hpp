@@ -17,9 +17,9 @@
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 #include "rclcpp_lifecycle/state.hpp"
 
-#include "robotic_Arm/visibility_control.h"
-#include "robotic_arm/CAN_Comms.hpp"
-#include "robotic_arm/Stepper.hpp"
+#include "visibility_control.h"
+#include "CAN_Comms.hpp"
+#include "Stepper.hpp"
 
 namespace robotic_arm
 {
@@ -31,10 +31,8 @@ namespace robotic_arm
         std::string diff_motor_L_name = "";
         std::string diff_motor_R_name = "";
 
-        float loop_rate = 0;
         std::string device = "";
         int CAN_rate = 0;
-        int timeout_ms = 0;
     };
 
     public:
@@ -44,13 +42,13 @@ namespace robotic_arm
         hardware_interface::CallbackReturn on_init(
             const hardware_interface::HardwareInfo & info) override;
 
-        ROBOTIC_ARM_PUBLIC
-        hardware_interface::CallbackReturn on_configure(
-            const rclcpp_lifecycle::State & previous_state);
+        // ROBOTIC_ARM_PUBLIC
+        // hardware_interface::CallbackReturn on_configure(
+        //     const rclcpp_lifecycle::State & previous_state);
 
-        ROBOTIC_ARM_PUBLIC
-        hardware_interface::CallbackReturn on_cleanup(
-            const rclcpp_lifecycle::State & previous_state);
+        // ROBOTIC_ARM_PUBLIC
+        // hardware_interface::CallbackReturn on_cleanup(
+        //     const rclcpp_lifecycle::State & previous_state);
 
         ROBOTIC_ARM_PUBLIC
         std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
@@ -76,10 +74,13 @@ namespace robotic_arm
 
     private:
         Config cfg_;
-        CANComms comms_;
+        rclcpp::Logger logger_ = rclcpp::get_logger("stepper_system_hardware");  
+        CANComms comms_{logger_}; 
 
-        StepperMotor diff_motor_L_;
-        StepperMotor diff_motor_R_;
+        StepperMotor diff_motor_L_{0x01, comms_, logger_};
+        StepperMotor diff_motor_R_{0x02, comms_, logger_};
+
+        std::string cmd_mode_ = "";
     };
 }
 

@@ -1,17 +1,27 @@
 #ifndef ROBOTIC_ARM_STEPPER_HPP
 #define ROBOTIC_ARM_STEPPER_HPP
 
-#include "CANComms.hpp"
-
+#include "CAN_Comms.hpp"
 #include <cstdint>
-#include <vector>
-#include <stdexcept>
+#include <string>
+#include <rclcpp/rclcpp.hpp>
+
+enum class CommandMode { SPEED, POSITION };
 
 class StepperMotor
 {
 public:
-    StepperMotor(int CAN_id, CANComms &comms)
-        : CAN_id_(CAN_id), comms_(comms) {}
+
+    std::string name = "";
+    double cmd_pos = 0;
+    double cmd_vel = 0;
+    double cmd_acc = 0;
+    double pos = 0;
+    double vel = 0;
+    double acc = 0;
+
+    StepperMotor(int CAN_id, CANComms &comms, const rclcpp::Logger &logger)
+        : CAN_id_(CAN_id), comms_(comms), logger_(logger) {}
 
     // Send command in speed mode (F6)
     bool send_speed(uint16_t rpm, uint8_t acc, bool clockwise = true)
@@ -25,7 +35,7 @@ public:
         uint8_t byte3 = low;
 
         std::vector<uint8_t> payload = {0xF6, byte2, byte3, acc};
-        return comms_.send_with_crc(CAN_id_, payload);
+        return comms_.send_frame(CAN_id_, payload);
     }
 
     // Send command in position mode 4 (F5) - absolute motion by axis
@@ -35,24 +45,27 @@ public:
         if (abs_axis < -8388607) abs_axis = -8388607;
         if (abs_axis > 8388607) abs_axis = 8388607;
 
-        std::vector<uint8_t> payload = {0xF5};
-        payload.push_back((rpm >> 8) & 0xFF);
-        payload.push_back(rpm & 0xFF);
-        payload.push_back(acc);
+        std::vector<uint8_t> payload = {
+            0xF5,
+            (uint8_t)((rpm >> 8) & 0xFF),
+            (uint8_t)(rpm & 0xFF),
+            acc,
+            (uint8_t)(abs_axis & 0xFF),
+            (uint8_t)((abs_axis >> 8) & 0xFF),
+            (uint8_t)((abs_axis >> 16) & 0xFF)
+        };
 
-        // 24-bit signed int for abs_axis (little-endian)
-        payload.push_back(abs_axis & 0xFF);
-        payload.push_back((abs_axis >> 8) & 0xFF);
-        payload.push_back((abs_axis >> 16) & 0xFF);
-
-        return comms_.send_with_crc(CAN_id_, payload);
+        return comms_.send_frame(CAN_id_, payload);
     }
 
     // Query speed (command 0x32)
     int16_t read_speed()
     {
         std::vector<uint8_t> query = {0x32};
-        comms_.send_with_crc(CAN_id_, query);
+        if (!comms_.send_frame(CAN_id_, query)) {
+            RCLCPP_ERROR(logger_, "Failed to send speed query (0x32)");
+            return 0;
+        }
 
         struct can_frame response;
         if (comms_.receive_frame(response))
@@ -63,14 +76,19 @@ public:
                 return speed;
             }
         }
-        throw std::runtime_error("Failed to read speed");
+
+        RCLCPP_ERROR(logger_, "Failed to receive speed response (0x32)");
+        return 0;
     }
 
     // Query encoder position (command 0x31)
     int64_t read_encoder_position()
     {
         std::vector<uint8_t> query = {0x31};
-        comms_.send_with_crc(CAN_id_, query);
+        if (!comms_.send_frame(CAN_id_, query)) {
+            RCLCPP_ERROR(logger_, "Failed to send encoder position query (0x31)");
+            return 0;
+        }
 
         struct can_frame response;
         if (comms_.receive_frame(response))
@@ -85,23 +103,28 @@ public:
                 return pos;
             }
         }
-        throw std::runtime_error("Failed to read encoder position");
+
+        RCLCPP_ERROR(logger_, "Failed to receive encoder position (0x31)");
+        return 0;
     }
 
+    // Set microstepping using command 0x84
     bool set_microsteps(uint8_t microstep_value)
     {
-        if (microstep_value == 0) {
-            std::cerr << "[StepperMotor] Invalid microstep value: 0\n";
+        if (microstep_value == 0)
+        {
+            RCLCPP_WARN(logger_, "Invalid microstep value: 0");
             return false;
         }
 
         std::vector<uint8_t> payload = {0x84, microstep_value};
-        return comms_.send_frame(CAN_id_, append_crc(CAN_id_, payload));
+        return comms_.send_frame(CAN_id_, payload);
     }
 
 private:
     uint8_t CAN_id_;
     CANComms &comms_;
+    rclcpp::Logger logger_;
 };
 
 #endif // ROBOTIC_ARM_STEPPER_HPP

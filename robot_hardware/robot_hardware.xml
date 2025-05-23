@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<library path="robot_hardware">
+  <class name="robotic_arm/ServoSystemHardware"
+         type="robotic_arm::ServoSystemHardware"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Made for a gear differential 2 DOF robotic arm with stepper motors communicating to the controller via CANbus.
+    </description>
+  </class>
+</library>
