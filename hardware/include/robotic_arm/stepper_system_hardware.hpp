@@ -1,5 +1,5 @@
-#ifndef STEPPER_SYSTEM_HARDWARE_HPP_
-#define STEPPER_SYSTEM_HARDWARE_HPP_
+#ifndef ROBOTIC_ARM_STEPPER_SYSTEM_HARDWARE_HPP_
+#define ROBOTIC_ARM_STEPPER_SYSTEM_HARDWARE_HPP_
 
 #include <memory>
 #include <string>
@@ -17,9 +17,9 @@
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 #include "rclcpp_lifecycle/state.hpp"
 
-#include "visibility_control.h"
-#include "CAN_Comms.hpp"
-#include "Stepper.hpp"
+#include "robotic_arm/visibility_control.h"
+#include "robotic_arm/CAN_Comms.hpp"
+#include "robotic_arm/Stepper.hpp"
 
 namespace robotic_arm
 {
@@ -84,4 +84,4 @@ namespace robotic_arm
     };
 }
 
-#endif  // STEPPER_SYSTEM_HARDWARE_HPP_
+#endif  // ROBOTIC_ARM_STEPPER_SYSTEM_HARDWARE_HPP_

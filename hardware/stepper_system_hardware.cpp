@@ -1,4 +1,4 @@
-#include "stepper_system_hardware.hpp"
+#include "robotic_arm/stepper_system_hardware.hpp"
 
 #include <chrono>
 #include <cmath>
@@ -138,7 +138,7 @@ namespace robotic_arm {
 
 
     hardware_interface::CallbackReturn StepperSystemHardware::on_activate(
-            const rclcpp_lifecycle::State & previous_state) 
+            const rclcpp_lifecycle::State & /*previous_state*/) 
     {
       RCLCPP_INFO(logger_, "Activating ...please wait...");
 
@@ -151,7 +151,7 @@ namespace robotic_arm {
     }
 
     hardware_interface::CallbackReturn StepperSystemHardware::on_deactivate(
-            const rclcpp_lifecycle::State & previous_state) 
+            const rclcpp_lifecycle::State & /*previous_state*/) 
     {
       RCLCPP_INFO(logger_, "Deactivating hardware interface...");
 
@@ -164,7 +164,7 @@ namespace robotic_arm {
     }
 
     hardware_interface::return_type StepperSystemHardware::read(
-            const rclcpp::Time & time, const rclcpp::Duration & period) 
+            const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) 
     {
         // Read the current speed of the motors
         diff_motor_L_.vel = diff_motor_L_.read_speed();
@@ -178,33 +178,33 @@ namespace robotic_arm {
     }
 
     hardware_interface::return_type StepperSystemHardware::write(
-            const rclcpp::Time & time, const rclcpp::Duration & period) 
+            const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) 
     {
       if (cmd_mode_ == "speed")
       {
-          const bool dir = diff_motor_L_.cmd_vel >= 0;
-          const uint16_t rpm = static_cast<uint16_t>(std::abs(diff_motor_L_.cmd_vel));
-          const uint8_t acc = static_cast<uint8_t>(diff_motor_L_.cmd_acc);
+          bool dir = diff_motor_L_.cmd_vel >= 0;
+          uint16_t rpm = static_cast<uint16_t>(std::abs(diff_motor_L_.cmd_vel));
+          uint8_t acc = static_cast<uint8_t>(diff_motor_L_.cmd_acc);
 
           diff_motor_L_.send_speed(rpm, acc, dir);
 
-          const bool dir = diff_motor_R_.cmd_vel >= 0;
-          const uint16_t rpm = static_cast<uint16_t>(std::abs(diff_motor_R_.cmd_vel));
-          const uint8_t acc = static_cast<uint8_t>(diff_motor_R_.cmd_acc);
+          dir = diff_motor_R_.cmd_vel >= 0;
+          rpm = static_cast<uint16_t>(std::abs(diff_motor_R_.cmd_vel));
+          acc = static_cast<uint8_t>(diff_motor_R_.cmd_acc);
 
           diff_motor_R_.send_speed(rpm, acc, dir);
       }
       else {
 
-          const int32_t abs_pos = static_cast<int32_t>(diff_motor_L_.cmd_pos);
-          const uint16_t rpm = static_cast<uint16_t>(std::abs(diff_motor_L_.cmd_vel));  
-          const uint8_t acc = static_cast<uint8_t>(diff_motor_L_.cmd_acc);
+          int32_t abs_pos = static_cast<int32_t>(diff_motor_L_.cmd_pos);
+          uint16_t rpm = static_cast<uint16_t>(std::abs(diff_motor_L_.cmd_vel));  
+          uint8_t acc = static_cast<uint8_t>(diff_motor_L_.cmd_acc);
 
           diff_motor_L_.send_absolute_position(abs_pos, rpm, acc);
 
-          const int32_t abs_pos = static_cast<int32_t>(diff_motor_R_.cmd_pos);
-          const uint16_t rpm = static_cast<uint16_t>(std::abs(diff_motor_R_.cmd_vel));
-          const uint8_t acc = static_cast<uint8_t>(diff_motor_R_.cmd_acc);
+          abs_pos = static_cast<int32_t>(diff_motor_R_.cmd_pos);
+          rpm = static_cast<uint16_t>(std::abs(diff_motor_R_.cmd_vel));
+          acc = static_cast<uint8_t>(diff_motor_R_.cmd_acc);
 
           diff_motor_R_.send_absolute_position(abs_pos, rpm, acc);
       }

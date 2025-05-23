@@ -16,7 +16,8 @@
   <depend>pluginlib</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_lifecycle</depend>
-  
+  <depend>controller_manager</depend>
+
   <export>
     <build_type>ament_cmake</build_type>
   </export>

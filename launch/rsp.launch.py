@@ -14,8 +14,8 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time')
 
     # Process the URDF file
-    pkg_path = os.path.join(get_package_share_directory('robot_description'))
-    xacro_file = os.path.join(pkg_path,'description','robot.urdf.xacro')
+    pkg_path = os.path.join(get_package_share_directory('robotic_arm'))
+    xacro_file = os.path.join(pkg_path,'urdf','robot.urdf.xacro')
 
     robot_description_config = Command(['xacro ', xacro_file, ' sim_mode:=', use_sim_time])
     
