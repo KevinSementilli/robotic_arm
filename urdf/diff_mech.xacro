@@ -5,6 +5,14 @@
         <color rgba="0 0 0 1"/>
     </material>
 
+    <material name="blue">
+        <color rgba="0.2 0.2 1 1"/>
+    </material>
+
+    <!-- ******************************************************************************************
+         ***************************************** Base *******************************************
+         ****************************************************************************************** -->
+
     <link name="world">
     </link>
 
@@ -14,7 +22,7 @@
             <geometry>
                 <mesh filename="package://robotic_arm/meshes/diff_base.stl" scale="0.001 0.001 0.001"/>
             </geometry>
-            <material name="black"/>
+            <material name="blue"/>
         </visual>
         <collision>
             <origin xyz="0 0 0"/>
@@ -29,5 +37,59 @@
         <child link="diff_base"/>
         <origin xyz="0 0 0" rpy="0 0 0"/>
     </joint>
+
+    <!-- ******************************************************************************************
+         *************************************** Carrier ******************************************
+         ****************************************************************************************** -->
+
+    <link name="carrier">
+        <visual>
+            <origin xyz="0 0 0.0149"/>
+            <geometry>
+                <mesh filename="package://robotic_arm/meshes/carrier.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="blue"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0.0149"/>
+            <geometry>
+                <mesh filename="package://robotic_arm/meshes/carrier.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="carrier_joint" type="continuous">
+        <parent link="diff_base"/>
+        <child link="carrier"/>
+        <origin xyz="0 0 0.2551" rpy="0 0 0"/>
+        <axis xyz="1 0 0"/>
+    </joint>
+
+    <!-- ******************************************************************************************
+         ***************************************** Bevel ******************************************
+         ****************************************************************************************** -->
+
+    <link name="bevel">
+        <visual>
+            <origin xyz="0 0 0" rpy="${pi} 0 0"/>
+            <geometry>
+                <mesh filename="package://robotic_arm/meshes/bevel_gear.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="blue"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="${pi} 0 0"/>
+            <geometry>
+                <mesh filename="package://robotic_arm/meshes/bevel_gear.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="bevel_joint" type="continuous">
+        <parent link="carrier"/>
+        <child link="bevel"/>
+        <origin xyz="0 0 0.0399" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/>
+    </joint>        
 
 </robot>

@@ -11,16 +11,16 @@ import xacro
 def generate_launch_description():
 
     # Check if we're told to use sim time
-    use_sim_time = LaunchConfiguration('use_sim_time')
+    cmd_mode = LaunchConfiguration('cmd_mode')
 
     # Process the URDF file
     pkg_path = os.path.join(get_package_share_directory('robotic_arm'))
     xacro_file = os.path.join(pkg_path,'urdf','robot.urdf.xacro')
 
-    robot_description_config = Command(['xacro ', xacro_file, ' sim_mode:=', use_sim_time])
+    robot_description_config = Command(['xacro ', xacro_file, ' cmd_mode:=', cmd_mode])
     
     # Create a robot_state_publisher node
-    params = {'robot_description': robot_description_config, 'use_sim_time': use_sim_time}
+    params = {'robot_description': robot_description_config, 'cmd_mode': cmd_mode}
 
     node_robot_state_publisher = Node(
         package='robot_state_publisher',
@@ -33,9 +33,9 @@ def generate_launch_description():
     # Launch!
     return LaunchDescription([
         DeclareLaunchArgument(
-            'use_sim_time',
-            default_value='False',
-            description='Use sim time if true'),
+            'cmd_mode',
+            default_value='position',
+            description='choose between position and speed control'),
 
         node_robot_state_publisher
     ])
