@@ -13,7 +13,6 @@ from launch.conditions import LaunchConfigurationEquals
 from launch.conditions import IfCondition
 from launch.substitutions import PythonExpression
 
-
 def generate_launch_description():
 
     package_name = 'robotic_arm'
@@ -94,32 +93,16 @@ def generate_launch_description():
         )
     )
 
-    invalid_mode_logger = LogInfo(
-        msg="[ERROR] Invalid cmd_mode: '${cmd_mode}'. Valid options are 'position' or 'velocity'.",
-        condition=IfCondition(
-            PythonExpression([
-                "not (", 
-                LaunchConfiguration("cmd_mode"), " == 'position' or ",
-                LaunchConfiguration("cmd_mode"), " == 'velocity')"
-            ])
-        )
-    )
-
     return LaunchDescription([
         DeclareLaunchArgument(
             'cmd_mode',
-            default_value='position',
+            default_value='speed',
             description='choose between position and speed control'
         ),
 
         rsp,
-        controller_manager,
         delay_controller_manager,
         timed_vel_controller_spawner,
         timed_pos_controller_spawner,
-        timed_joint_broad_spawner,
-        invalid_mode_logger
+        timed_joint_broad_spawner
     ])
-
-
-
