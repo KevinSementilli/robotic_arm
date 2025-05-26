@@ -12,7 +12,6 @@ class StepperMotor
 {
 public:
 
-    std::string name = "";
     double cmd_pos = 0;
     double cmd_vel = 0;
     double cmd_acc = 0;

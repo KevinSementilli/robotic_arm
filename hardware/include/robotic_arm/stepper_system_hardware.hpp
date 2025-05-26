@@ -28,11 +28,32 @@ namespace robotic_arm
 
     struct Config {
     
-        std::string diff_motor_L_name = "";
-        std::string diff_motor_R_name = "";
+        std::string carrier_name = "";
+        std::string central_bevel_name = "";
 
         std::string device = "";
         int CAN_rate = 0;
+        int timout_ms = 0;
+    };
+
+    struct Carrier {
+        std::string name = "";
+        double cmd_pos = 0;
+        double cmd_vel = 0;
+        double cmd_acc = 0;
+        double pos = 0;
+        double vel = 0;
+        double acc = 0;
+    };
+
+    struct CentralBevel {
+        std::string name = "";
+        double cmd_pos = 0;
+        double cmd_vel = 0;
+        double cmd_acc = 0;
+        double pos = 0;
+        double vel = 0;
+        double acc = 0;
     };
 
     public:
@@ -72,6 +93,18 @@ namespace robotic_arm
         hardware_interface::return_type write(
             const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
+        ROBOTIC_ARM_PUBLIC
+        void set_motor_cmd()
+        {   
+            diff_motor_L_.cmd_pos = (pulley_ratio_ * bevel_gear_ratio_)*(carrier_.cmd_pos + central_bevel_.cmd_pos);
+            diff_motor_L_.cmd_vel = (pulley_ratio_ * bevel_gear_ratio_)*(carrier_.cmd_vel + central_bevel_.cmd_vel);
+            diff_motor_L_.cmd_acc = (pulley_ratio_ * bevel_gear_ratio_)*(carrier_.cmd_acc + central_bevel_.cmd_acc);    
+
+            diff_motor_R_.cmd_pos = (pulley_ratio_ * bevel_gear_ratio_)*(carrier_.cmd_pos - central_bevel_.cmd_pos);
+            diff_motor_R_.cmd_vel = (pulley_ratio_ * bevel_gear_ratio_)*(carrier_.cmd_vel - central_bevel_.cmd_vel);
+            diff_motor_R_.cmd_acc = (pulley_ratio_ * bevel_gear_ratio_)*(carrier_.cmd_acc - central_bevel_.cmd_acc);
+        }
+
     private:
         Config cfg_;
         rclcpp::Logger logger_ = rclcpp::get_logger("stepper_system_hardware");  
@@ -79,6 +112,11 @@ namespace robotic_arm
 
         StepperMotor diff_motor_L_{0x01, comms_, logger_};
         StepperMotor diff_motor_R_{0x02, comms_, logger_};
+
+        Carrier carrier_;
+        CentralBevel central_bevel_;
+        const double pulley_ratio_ = 1.8;
+        const double bevel_gear_ratio_ = 2.0;
 
         std::string cmd_mode_ = "";
     };

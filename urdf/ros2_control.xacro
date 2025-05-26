@@ -5,10 +5,11 @@
         <ros2_control name="StepperSystemHardware" type="system">
             <hardware>    
                 <plugin>robotic_arm/StepperSystemHardware</plugin>
-                <param name="diff_motor_L_name">diff_motor_L</param>
-                <param name="diff_motor_R_name">diff_motor_R</param>
+                <param name="carrier_name">carrier_joint</param>
+                <param name="central_bevel_name">bevel_joint</param>
                 <param name="device">can0</param>
                 <param name="CAN_rate">5000000</param>
+                <param name="timeout_ms">5000</param>
             </hardware>
 
             <joint name="carrier_joint">
@@ -32,48 +33,6 @@
                 <state_interface name="position"/>
                 <state_interface name="velocity"/>
             </joint>
-            
-            <transmission name="diff_trans">
-                <plugin>transmission_interface/DifferentialTransmission</plugin>
-
-                <actuator name="diff_motor_L" role="actuator1">
-                    <xacro:if value="${cmd_mode == 'position'}">
-                        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-                    </xacro:if>
-                    <xacro:if value="${cmd_mode == 'speed'}">
-                        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-                    </xacro:if>
-                    <mechanicalReduction>1</mechanicalReduction>
-                </actuator>
-
-                <actuator name="diff_motor_R" role="actuator2">
-                    <xacro:if value="${cmd_mode == 'position'}">
-                        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-                    </xacro:if>
-                    <xacro:if value="${cmd_mode == 'speed'}">
-                        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-                    </xacro:if>
-                    <mechanicalReduction>1</mechanicalReduction>
-                </actuator>
-
-                <joint name="carrier_joint" role="joint1">
-                    <xacro:if value="${cmd_mode == 'position'}">
-                        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-                    </xacro:if>
-                    <xacro:if value="${cmd_mode == 'speed'}">
-                        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-                    </xacro:if>
-                </joint>
-
-                <joint name="bevel_joint" role="joint2">
-                    <xacro:if value="${cmd_mode == 'position'}">
-                        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-                    </xacro:if>
-                    <xacro:if value="${cmd_mode == 'speed'}">
-                        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-                    </xacro:if>
-                </joint>
-            </transmission>
         </ros2_control> 
     </xacro:macro>
 
