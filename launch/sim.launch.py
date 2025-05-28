@@ -35,17 +35,6 @@ def generate_launch_description():
         condition=LaunchConfigurationEquals('sim_mode', 'foxglove'),
     )
 
-    invalid_mode_logger = LogInfo(
-        msg="[ERROR] Invalid sim_mode: '${sim_mode}'. Valid options are 'rviz' or 'foxglove'.",
-        condition=IfCondition(
-            PythonExpression([
-                "not (", 
-                LaunchConfiguration("sim_mode"), " == 'rviz' or ",
-                LaunchConfiguration("sim_mode"), " == 'foxglove')"
-            ])
-        )
-    )
-
     return LaunchDescription([
         DeclareLaunchArgument(
             'sim_mode',
@@ -54,6 +43,5 @@ def generate_launch_description():
         ),
         node_rviz,
         node_foxglove,
-        invalid_mode_logger
     ])
 

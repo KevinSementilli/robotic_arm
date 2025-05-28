@@ -2,10 +2,17 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro"  name="robot_arm">
 
     <xacro:arg name="cmd_mode" default="position"/>
+    <xacro:arg name="real_time" default="true"/>
 
     <xacro:include filename="diff_mech.xacro"/>
-    <xacro:include filename="ros2_control.xacro"/>
 
-    <xacro:ros2_control cmd_mode="$(arg cmd_mode)"/>
+    <xacro:if value="$(arg real_time)">    
+        <xacro:include filename="ros2_control.xacro"/>
+        <xacro:ros2_control cmd_mode="$(arg cmd_mode)"/>
+    </xacro:if>
+
+    <xacro:unless value="$(arg real_time)">
+        <xacro:include filename="sim_control.xacro"/>
+    </xacro:unless>
     
 </robot>

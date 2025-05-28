@@ -18,12 +18,13 @@ def generate_launch_description():
     package_name = 'robotic_arm'
 
     cmd_mode = LaunchConfiguration('cmd_mode')
+    real_time = LaunchConfiguration('real_time')
 
     # launch robot_state_publisher 
     rsp = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             [os.path.join(get_package_share_directory(package_name), 'launch' ,'rsp.launch.py')]), 
-            launch_arguments={'cmd_mode': cmd_mode}.items()
+            launch_arguments={'cmd_mode': cmd_mode, 'real_time': real_time}.items()
     )
 
     controller_config = os.path.join(
@@ -41,7 +42,7 @@ def generate_launch_description():
     )
 
     delay_controller_manager = TimerAction(
-        period=2.0, 
+        period=3.0, 
         actions={controller_manager}
     )
 
@@ -98,6 +99,12 @@ def generate_launch_description():
             'cmd_mode',
             default_value='speed',
             description='choose between position and speed control'
+        ),
+
+        DeclareLaunchArgument(
+            'real_time',
+            default_value='true',
+            description='choose between real hardware and mock hardware'
         ),
 
         rsp,

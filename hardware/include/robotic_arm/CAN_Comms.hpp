@@ -56,8 +56,9 @@ public:
 
     bool connect(const std::string &interface, int bitrate) {
         std::string cmd = 
-            "ip link set " + interface + " type can bitrate " + std::to_string(bitrate) +
-            " && ip link set " + interface + " up";
+            "sudo /sbin/ip link set " + interface + " down && " +
+            "sudo /sbin/ip link set " + interface + " type can bitrate " + std::to_string(bitrate) + " && " +
+            "sudo /sbin/ip link set " + interface + " up";
         int ret = std::system(cmd.c_str());
         return (ret == 0);
     }

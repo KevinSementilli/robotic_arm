@@ -1,0 +1,9 @@
+teleop_vel:
+  ros__parameters:
+    joint_names:
+      - base_joint
+      - arm1_joint
+      - arm2_joint
+      - arm3_joint
+      - left_claw_joint
+    joint_speed: 2.5  # rad/sec

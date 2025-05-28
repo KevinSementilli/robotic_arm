@@ -178,18 +178,18 @@ namespace robotic_arm {
             const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) 
     {
         // Read the current speed of the motors
-        diff_motor_L_.vel = diff_motor_L_.read_speed();
-        diff_motor_R_.vel = diff_motor_R_.read_speed();
+        // diff_motor_L_.vel = diff_motor_L_.read_speed();
+        // diff_motor_R_.vel = diff_motor_R_.read_speed();
 
-        // Read the current position of the motors
-        diff_motor_L_.pos = diff_motor_L_.read_encoder_position();
-        diff_motor_R_.pos = diff_motor_R_.read_encoder_position();
+        // // Read the current position of the motors
+        // diff_motor_L_.pos = diff_motor_L_.read_encoder_position();
+        // diff_motor_R_.pos = diff_motor_R_.read_encoder_position();
 
-        // Compute the carrier and central bevel positions and velocities
-        carrier_.pos = (diff_motor_L_.pos + diff_motor_R_.pos) / (pulley_ratio_ * bevel_gear_ratio_);
-        carrier_.vel = (diff_motor_L_.vel + diff_motor_R_.vel) / (pulley_ratio_ * bevel_gear_ratio_);
-        central_bevel_.pos = (diff_motor_L_.pos - diff_motor_R_.pos) / (pulley_ratio_ * bevel_gear_ratio_);
-        central_bevel_.vel = (diff_motor_L_.vel - diff_motor_R_.vel) / (pulley_ratio_ * bevel_gear_ratio_);
+        // // Compute the carrier and central bevel positions and velocities
+        // carrier_.pos = (diff_motor_L_.pos + diff_motor_R_.pos) / (pulley_ratio_ * bevel_gear_ratio_);
+        // carrier_.vel = (diff_motor_L_.vel + diff_motor_R_.vel) / (pulley_ratio_ * bevel_gear_ratio_);
+        // central_bevel_.pos = (diff_motor_L_.pos - diff_motor_R_.pos) / (pulley_ratio_ * bevel_gear_ratio_);
+        // central_bevel_.vel = (diff_motor_L_.vel - diff_motor_R_.vel) / (pulley_ratio_ * bevel_gear_ratio_);
 
         return hardware_interface::return_type::OK;
     }

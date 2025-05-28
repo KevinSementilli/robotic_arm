@@ -83,9 +83,9 @@ public:
     // Query encoder position (command 0x31)
     int64_t read_encoder_position()
     {
-        std::vector<uint8_t> query = {0x31};
+        std::vector<uint8_t> query = {0x30};
         if (!comms_.send_frame(CAN_id_, query)) {
-            RCLCPP_ERROR(logger_, "Failed to send encoder position query (0x31)");
+            RCLCPP_ERROR(logger_, "Failed to send encoder position query (0x30)");
             return 0;
         }
 
@@ -103,7 +103,7 @@ public:
             }
         }
 
-        RCLCPP_ERROR(logger_, "Failed to receive encoder position (0x31)");
+        RCLCPP_ERROR(logger_, "Failed to receive encoder position (0x30)");
         return 0;
     }
 
