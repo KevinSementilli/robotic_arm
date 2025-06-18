@@ -12,11 +12,19 @@ controller_manager:
 vel_controller:
   ros__parameters:
     joints:
-      - carrier_joint
-      - bevel_joint
+      - top_base_joint
+      - shoulder_joint
+      - elbow_joint
+      - forearm_joint
+      - wrist_carrier_joint
+      - wrist_bevel_joint
 
 joint_broadcaster:
   ros__parameters:
     joints:
-      - carrier_joint
-      - bevel_joint
+      - top_base_joint
+      - shoulder_joint
+      - elbow_joint
+      - forearm_joint
+      - wrist_carrier_joint
+      - wrist_bevel_joint
