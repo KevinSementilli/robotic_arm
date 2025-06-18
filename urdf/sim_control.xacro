@@ -1,13 +1,16 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+  <xacro:macro name="ros2_control_mock_hardware" params="cmd_mode">
     <ros2_control name="sim_control" type="system">
       <hardware>
         <plugin>mock_components/GenericSystem</plugin>
       </hardware>
 
       <joint name="carrier_joint">
-        <command_interface name="position"/>
+        <xacro:if value="${cmd_mode == 'position'}">
+          <command_interface name="position"/>
+        </xacro:if>
         <command_interface name="velocity"/>
         <command_interface name="acceleration"/>
         <state_interface name="position">
@@ -17,7 +20,9 @@
       </joint>
 
       <joint name="bevel_joint">
-        <command_interface name="position"/>
+        <xacro:if value="${cmd_mode == 'position'}">
+          <command_interface name="position"/>
+        </xacro:if>
         <command_interface name="velocity"/>
         <command_interface name="acceleration"/>
         <state_interface name="position">
@@ -27,6 +32,6 @@
       </joint>
 
     </ros2_control>
-
+  </xacro:macro>
 
 </robot>

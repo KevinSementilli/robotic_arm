@@ -14,15 +14,13 @@ def generate_launch_description():
     package_name = 'robotic_arm'
 
     # Declare use_sim_time argument
-    use_sim_time = LaunchConfiguration('use_sim_time')
+    cmd_mode = LaunchConfiguration('cmd_mode')
 
     # Include rsp.launch.py
     rsp = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(
-            get_package_share_directory(package_name), 'launch', 'rsp.launch.py')),
-        launch_arguments={
-            'use_sim_time': use_sim_time,
-        }.items()  # Pass use_sim_time as an argument
+            get_package_share_directory(package_name), 'launch/include', 'rsp.launch.py')),
+        launch_arguments={'cmd_mode': cmd_mode, 'real_time': 'false'}.items()  
     )
 
     # Joint State Publisher GUI Node
@@ -31,7 +29,6 @@ def generate_launch_description():
         executable='joint_state_publisher_gui',
         name='joint_state_publisher_gui',
         output='screen',
-        parameters=[{'use_sim_time': use_sim_time}]
     )
 
     rviz_config_file = os.path.join(
@@ -44,15 +41,14 @@ def generate_launch_description():
         name='rviz2',
         output='screen',
         arguments=['-d', rviz_config_file],
-        parameters=[{'use_sim_time': use_sim_time}]
     )
 
     # Launch Description
     return LaunchDescription([
         DeclareLaunchArgument(
-            'use_sim_time',
-            default_value='False',
-            description='Use sim time if true'),
+            'cmd_mode',
+            default_value='speed',
+            description='Choose between position and speed control'),
 
         rsp,
         node_joint_state_publisher_gui,

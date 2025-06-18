@@ -3,18 +3,17 @@ import os
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, TimerAction
+from launch.actions import IncludeLaunchDescription, TimerAction, DeclareLaunchArgument
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import Command
+from launch.substitutions import LaunchConfiguration
 from launch.actions import RegisterEventHandler
 from launch.event_handlers import OnProcessStart
 
 from launch_ros.actions import Node
-from launch.actions import TimerAction
 
 def generate_launch_description():
 
-    package_name='demo_arm'
+    package_name='robotic_arm'
 
     cmd_mode = LaunchConfiguration('cmd_mode')
     real_time = LaunchConfiguration('real_time')
@@ -22,13 +21,13 @@ def generate_launch_description():
     # launch robot_state_publisher 
     rsp = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            [os.path.join(get_package_share_directory(package_name), 'launch' ,'rsp.launch.py')]), 
+            [os.path.join(get_package_share_directory(package_name), 'launch/include' ,'rsp.launch.py')]), 
             launch_arguments={'cmd_mode': cmd_mode, 'real_time': real_time}.items()
     )
 
-    teleop_vel_node = IncludeLaunchDescription(
+    teleop_twist_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            [os.path.join(get_package_share_directory(package_name), 'launch' ,'teleop_vel.launch.py')]), 
+            [os.path.join(get_package_share_directory(package_name), 'launch/include' ,'twist_joy.launch.py')]), 
     )
 
     controller_config = os.path.join(
@@ -69,7 +68,7 @@ def generate_launch_description():
     joint_broad_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["joint_broad"],
+        arguments=["joint_broadcaster"],
         output="screen",
     )
 
@@ -81,11 +80,20 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+
+        DeclareLaunchArgument(
+            'cmd_mode',
+            default_value='speed',
+            description='Use sim time if true'),
+
+        DeclareLaunchArgument(
+            'real_time',
+            default_value='false',
+            description='Use real time if true'),
+
         rsp,
         delayed_controller_manager,
-        
         delayed_vel_controller_spawner,
         delayed_joint_broad_spawner,
-
-        teleop_vel_node,
+        teleop_twist_node,
     ])

@@ -13,6 +13,7 @@
 
     <xacro:unless value="$(arg real_time)">
         <xacro:include filename="sim_control.xacro"/>
+        <xacro:ros2_control_mock_hardware cmd_mode="$(arg cmd_mode)"/>
     </xacro:unless>
     
 </robot>

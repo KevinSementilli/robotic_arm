@@ -6,23 +6,17 @@ controller_manager:
     vel_controller:
       type: velocity_controllers/JointGroupVelocityController
 
-    joint_broad:
+    joint_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
 
 vel_controller:
   ros__parameters:
     joints:
-      - rot_base_joint
-      - arm1_joint
-      - arm2_joint
-      - arm3_joint
-      - left_claw_joint
+      - carrier_joint
+      - bevel_joint
 
-joint_broad:
+joint_broadcaster:
   ros__parameters:
     joints:
-      - rot_base_joint
-      - arm1_joint
-      - arm2_joint
-      - arm3_joint
-      - left_claw_joint
+      - carrier_joint
+      - bevel_joint

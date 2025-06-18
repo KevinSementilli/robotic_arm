@@ -10,9 +10,6 @@ from launch.event_handlers import OnProcessStart
 from launch_ros.actions import Node
 from launch.conditions import LaunchConfigurationEquals
 
-from launch.conditions import IfCondition
-from launch.substitutions import PythonExpression
-
 def generate_launch_description():
 
     package_name = 'robotic_arm'
@@ -23,7 +20,7 @@ def generate_launch_description():
     # launch robot_state_publisher 
     rsp = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            [os.path.join(get_package_share_directory(package_name), 'launch' ,'rsp.launch.py')]), 
+            [os.path.join(get_package_share_directory(package_name), 'launch/include' ,'rsp.launch.py')]), 
             launch_arguments={'cmd_mode': cmd_mode, 'real_time': real_time}.items()
     )
 

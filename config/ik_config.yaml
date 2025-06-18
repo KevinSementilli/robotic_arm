@@ -1,0 +1,13 @@
+/**:
+    ros__parameters:
+        # Robot parameters
+        # DH table (order a_i, alpha_i, d_i, theta_i)
+        dh: [0.0,   1.5707963268,   0.2755,     0.0,
+            0.41,   3.1415926536,   0.0,        0.0, 
+            0.0,    1.5707963268,   -0.0098,    0.0,
+            0.0,    2.0943951024,   -0.2814,    0.0,
+            0.0,    2.0943951024,   -0.1482,    0.0,
+            0.0,    3.1415926536,   -0.2341,    0.0]
+
+        # Link types (JOINT_REVOLUTE or JOINT_PRISMATIC)
+        link_types: [JOINT_REVOLUTE, JOINT_REVOLUTE, JOINT_REVOLUTE, JOINT_REVOLUTE, JOINT_REVOLUTE, JOINT_REVOLUTE]
