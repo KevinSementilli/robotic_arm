@@ -7,6 +7,8 @@
 #include "CANbus.h"
 #include "MotorController.h"
 
+enum ControlMode { IDLE, POSITION, SPEED };
+
 class StepperMotor {
 public:
     float cmd_pos_ = 0;
@@ -15,26 +17,28 @@ public:
     float pos_ = 0;
     float vel_ = 0;
     float acc_ = 0;
+    ControlMode mode_ = IDLE;
 
     StepperMotor(int pulPin, int dirPin, int enPin, int pwmChannel, uint8_t id);
 
-    // Command inputs from CAN or planner
-    void setPositionCommand(MotorCommand& cmd);
-    void setVelocityCommand(MotorCommand& cmd);
+    void calibrate();
 
-    // Periodic update for PID control execution
-    void runPID(float dt);
+    // Command inputs from CAN
+    void setPositionCommand(float pos, float vel, float acc);
+    void setSpeedCommand(float vel, float acc);
 
-    // External state update (e.g., encoder)
+    void runMotor(float dt);
+    void runPositionControl(float dt);
+    void runSpeedControl(float dt);
+
+    // External state update (encoder)
     void updatePosition();
     void updateVelocity(float dt);
 
 private:
 
     MotorController controller_;
-    float kp = 1;   
-    float ki = 0;   
-    float kd = 0; 
+    float kp = 1, ki = 0, kd = 0; // PID gains
 
     AS5600 encoder_;
     uint16_t last_raw_angle_ = 0;

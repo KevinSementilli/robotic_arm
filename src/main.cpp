@@ -87,6 +87,24 @@ void test_StepperMotor_pid() {
     Serial.println("[✓] PID loop with encoder feedback complete");
 }
 
+void test_system() {
+    Serial.println("========== [TEST 5] System Initialization ==========");
+    
+    // Initialize CAN bus
+    if (CANbus::begin()) {
+        Serial.println("[✓] CAN bus initialized successfully");
+    } else {
+        Serial.println("[✗] Failed to initialize CAN bus");
+    }
+
+    if (CANbus::updateCommand()) {
+        Serial.println("[✓] Command updated from CAN bus");
+    } else {
+        Serial.println("[✗] No command received from CAN bus");
+    }
+
+}
+
 void setup() {
     Serial.begin(115200);
     delay(1000);
@@ -103,6 +121,9 @@ void setup() {
     delay(1000);
 
     test_StepperMotor_pid();
+    delay(1000);
+
+    test_system();
     delay(1000);
 
     Serial.println("===== ALL UNIT TESTS COMPLETE =====");

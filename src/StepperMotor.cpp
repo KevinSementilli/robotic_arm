@@ -17,17 +17,17 @@ StepperMotor::StepperMotor(int pulPin, int dirPin, int enPin, int pwmChannel, ui
     controller_.enable();
 }
 
-// Set full motion command
-void StepperMotor::setPositionCommand(MotorCommand& cmd) {
-    cmd_pos_ = cmd.position;
-    cmd_vel_ = cmd.velocity;
-    cmd_acc_ = cmd.acceleration;
+void StepperMotor::setPositionCommand(float pos, float vel, float acc) {
+    cmd_pos_ = pos;
+    cmd_vel_ = vel;
+    cmd_acc_ = acc;
+    mode_ = POSITION; 
 }
 
-// Set only velocity command (optional mode)
-void StepperMotor::setVelocityCommand(MotorCommand& cmd) {
-    cmd_vel_ = cmd.velocity;
-    cmd_acc_ = cmd.acceleration;
+void StepperMotor::setSpeedCommand(float vel, float acc) {
+    cmd_vel_ = vel;
+    cmd_acc_ = acc;
+    mode_ = SPEED;
 }
 
 // Update encoder feedback
@@ -54,22 +54,24 @@ void StepperMotor::updateVelocity(float dt) {
     last_angle_deg_ = angle_deg;
 }
 
-
-// Execute PID control and apply to motor
-void StepperMotor::runPID(float dt) {
+void StepperMotor::runMotor(float dt) {
+    
     updatePosition();
     updateVelocity(dt);
 
-    // --- Get CAN Command for This Motor ---
-    MotorCommand cmd = CANbus::getCommand(id_);
-    if (!cmd.valid) return;
+    if (mode_ == IDLE) {
+        controller_.setSpeed(0); // Stop motor
+        return;
+    } else if (mode_ == POSITION) {
+        runPositionControl(dt);
+    } else if (mode_ == SPEED) {
+        runSpeedControl(dt);
+    }
+}
 
-    setPositionCommand(cmd);
-
-    // --- PID Calculation (Position loop) ---
+void StepperMotor::runPositionControl(float dt) {
     float error = cmd_pos_ - pos_;
-    static float integral = 0;
-    static float prev_error = 0;
+    static float integral = 0, prev_error = 0;
 
     integral += error * dt;
     float derivative = (error - prev_error) / dt;
@@ -97,7 +99,31 @@ void StepperMotor::runPID(float dt) {
     controller_.setDirection(output_vel >= 0);
     controller_.setPulseFrequency(fabs(output_vel));  // Hz ~ steps/sec
     controller_.setSpeed(128); // 50% duty for a clean square wave
+
 }
 
+void StepperMotor::runSpeedControl(float dt) {
+    
+    float vel_error = cmd_vel_ - vel_; // current vel from encoder
+    static float integral = 0, prev_error = 0;
 
+    integral += vel_error * dt;
+    float derivative = (vel_error - prev_error) / dt;
+    prev_error = vel_error;
 
+    float target_vel = kp * vel_error + ki * integral + kd * derivative;
+
+    // Clamp acceleration
+    static float last_output_vel = 0;
+    float max_delta_vel = cmd_acc_ * dt;
+    float vel_change = target_vel - last_output_vel;
+    if (vel_change > max_delta_vel) vel_change = max_delta_vel;
+    if (vel_change < -max_delta_vel) vel_change = -max_delta_vel;
+
+    float output_vel = last_output_vel + vel_change;
+    last_output_vel = output_vel;
+
+    controller_.setDirection(output_vel >= 0);
+    controller_.setPulseFrequency(fabs(output_vel));
+    controller_.setSpeed(128);
+}
