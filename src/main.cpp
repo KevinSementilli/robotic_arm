@@ -1,7 +1,5 @@
 #include <Arduino.h>
 #include "CANbus.h"
-#include "MotorController.h"
-#include "StepperMotor.h"
 
 // Replace these with actual pins used in your circuit
 #define PUL_PIN 23
@@ -16,31 +14,33 @@ float testTime = 0;
 bool testStarted = false;
 
 void test_CAN_receiver() {
-    Serial.println("========== [TEST 1] CANbus Message Retrieval ==========");
+    Serial.println("========== [TEST 1] CANbus Command Execution ==========");
 
-    // parse and store the latest frame
-    CANbus::update(); 
-
-    MotorCommand cmd = CANbus::getCommand(0);  // Test for motor ID 0
-    if (cmd.valid) {
-        Serial.println("[✓] Command received!");
-        Serial.printf("  • Position: %.2f\n", cmd.position);
-        Serial.printf("  • Velocity: %.2f\n", cmd.velocity);
-        Serial.printf("  • Acceleration: %.2f\n", cmd.acceleration);
-    } else {
-        Serial.println("[✗] No valid command received.");
+    if (!CANbus::updateCommand()) {
+        Serial.println("[✗] No CAN message received");
+        return;
     }
-}
 
+    // Check if StepperMotor was updated by CANbus
+    Serial.printf("[✓] Command executed on Motor 0:\n");
+    Serial.printf("  • Target Position: %.2f\n", stepper.cmd_pos_);
+    Serial.printf("  • Target Velocity: %.2f\n", stepper.cmd_vel_);
+    Serial.printf("  • Target Acceleration: %.2f\n", stepper.cmd_acc_);
+    Serial.printf("  • Mode: %s\n",
+                  stepper.mode_ == POSITION ? "POSITION" :
+                  stepper.mode_ == SPEED ? "SPEED" : "IDLE");
+}
 
 void test_CAN_enc_feedback() {
     Serial.println("========== [TEST 2] CANbus Feedback Transmission ==========");
-    float dummy_pos = 123.45;
-    float dummy_vel = 67.89;
-    Serial.println("[i] Sending feedback...");
+    float dummy_pos = 120.0;
+    float dummy_vel = 20.0;
 
-    CANbus::sendFeedback(0, dummy_pos, dummy_vel);
-    Serial.printf("[✓] Sent pos=%.2f, vel=%.2f on ID 100\n", dummy_pos, dummy_vel);
+    Serial.println("[i] Sending feedback...");
+    CANbus::sendPosition(0);
+    CANbus::sendSpeed(0);
+
+    Serial.printf("[✓] Sent test feedback (pos=%.2f, vel=%.2f)\n", dummy_pos, dummy_vel);
 }
 
 void test_MotorController() {
@@ -51,58 +51,166 @@ void test_MotorController() {
     controller.enable();
 
     controller.setDirection(true);
-    controller.setPulseFrequency(1000); // 1kHz pulse train
-    controller.setSpeed(128); // 50% duty
+    controller.setPulseFrequency(1000);
+    controller.setSpeed(128);
 
-    Serial.println("[✓] PWM set to 1kHz, duty 50%, direction: forward");
+    Serial.println("[✓] Forward, 1kHz PWM");
     delay(2000);
 
     controller.setDirection(false);
-    Serial.println("[✓] Direction set to reverse");
-
+    Serial.println("[✓] Reverse direction");
     delay(2000);
+
     controller.disable();
     Serial.println("[✓] Controller disabled");
 }
 
-void test_StepperMotor_pid() {
-    Serial.println("========== [TEST 4] StepperMotor PID + Encoder ==========");
+void test_StepperMotor_position() {
+    Serial.println("========== [TEST 4] StepperMotor POSITION Control ==========");
 
-    // Set a manual command (bypassing CANbus)
-    float target_position = 100.0; // degrees
-    float target_velocity = 0.0;
-    float target_acceleration = 0.0;
+    float target_position = 90.0;  // degrees
+    float max_velocity = 20;    // rpm
+    float max_acc = 2;          // 0-255
 
-    stepper.setCommand(target_position, target_velocity, target_acceleration);
+    stepper.setPositionCommand(target_position, max_velocity, max_acc);
 
-    float dt = 0.01; // 10 ms
+    float dt = 0.01;
     for (int i = 0; i < 100; ++i) {
-        stepper.runPID(dt); // update() handles encoder + PID internally
-
-        Serial.printf("Step %02d | Pos: %.2f | Error: %.2f | Vel: %.2f\n",
-                      i, stepper.pos_, target_position - stepper.pos_, stepper.vel_);
+        stepper.runMotor(dt);
+        Serial.printf("Step %02d | Pos: %.2f | Error: %.2f | Mode: POSITION\n",
+                      i, stepper.pos_, target_position - stepper.pos_);
         delay(10);
     }
 
-    Serial.println("[✓] PID loop with encoder feedback complete");
+    Serial.println("[✓] Position control test complete");
+}
+
+void test_StepperMotor_speed() {
+    Serial.println("========== [TEST 5] StepperMotor SPEED Control ==========");
+
+    float target_velocity = 50.0; // rpm
+    float max_acc = 2.0;          // 0-255
+
+    stepper.setSpeedCommand(target_velocity, max_acc);
+
+    float dt = 0.01;
+    for (int i = 0; i < 100; ++i) {
+        stepper.runMotor(dt);
+        Serial.printf("Step %02d | Vel: %.2f | Target: %.2f | Mode: SPEED\n",
+                      i, stepper.vel_, target_velocity);
+        delay(10);
+    }
+
+    Serial.println("[✓] Speed control test complete");
 }
 
 void test_system() {
-    Serial.println("========== [TEST 5] System Initialization ==========");
+    Serial.println("========== [TEST 6] Full System Workflow ==========");
+
+    // 1. Initialize CAN
+    if (!CANbus::begin()) {
+        Serial.println("[✗] CAN bus initialization failed");
+        return;
+    }
+    Serial.println("[✓] CAN bus initialized");
+
+    Serial.println("[i] Waiting for CAN command (Position or Speed)...");
     
-    // Initialize CAN bus
-    if (CANbus::begin()) {
-        Serial.println("[✓] CAN bus initialized successfully");
-    } else {
-        Serial.println("[✗] Failed to initialize CAN bus");
+    unsigned long startTime = millis();
+    bool commandReceived = false;
+
+    // 2. Wait for a CAN command for up to 5 seconds
+    while (millis() - startTime < 5000) {
+        if (CANbus::updateCommand()) {
+            Serial.println("[✓] Command received and processed by CANbus");
+            commandReceived = true;
+            break;
+        }
     }
 
-    if (CANbus::updateCommand()) {
-        Serial.println("[✓] Command updated from CAN bus");
-    } else {
-        Serial.println("[✗] No command received from CAN bus");
+    if (!commandReceived) {
+        Serial.println("[✗] No CAN command received within timeout");
+        return;
     }
 
+    // 3. Run the motor based on the received command
+    Serial.println("[i] Executing command...");
+
+    float dt = 0.01;
+    for (int i = 0; i < 200; i++) {
+        stepper.runMotor(dt);
+
+        // Print live feedback
+        if (stepper.mode_ == POSITION) {
+            Serial.printf("Mode: POSITION | Pos: %.2f | Target: %.2f | Vel: %.2f\n",
+                          stepper.pos_, stepper.cmd_pos_, stepper.vel_);
+        } else if (stepper.mode_ == SPEED) {
+            Serial.printf("Mode: SPEED | Vel: %.2f | Target: %.2f\n",
+                          stepper.vel_, stepper.cmd_vel_);
+        } else {
+            Serial.println("Mode: IDLE");
+        }
+        delay(10);
+    }
+
+    Serial.println("[✓] System workflow test complete");
+}
+
+void tune_PID() {
+    Serial.println("========== [PID TUNING MODE] ==========");
+    Serial.println("Enter kp, ki, kd separated by spaces (e.g., '1.2 0.01 0.05')");
+    Serial.println("Type 'exit' to stop tuning.");
+
+    float target_pos = 90.0;  // Example position target (degrees)
+    float max_vel = 180.0;    // Max velocity
+    float max_acc = 90.0;     // Max acceleration
+
+    // Set initial command
+    stepper.setPositionCommand(target_pos, max_vel, max_acc);
+
+    while (true) {
+        // 1) Check for new PID input
+        if (Serial.available()) {
+            String input = Serial.readStringUntil('\n');
+            input.trim();
+
+            if (input.equalsIgnoreCase("exit")) {
+                Serial.println("[✓] Exiting PID tuning mode");
+                stepper.mode_ = IDLE;
+                break;
+            }
+
+            // Parse kp, ki, kd
+            float new_kp, new_ki, new_kd;
+            int parsed = sscanf(input.c_str(), "%f %f %f", &new_kp, &new_ki, &new_kd);
+
+            if (parsed == 3) {
+                stepper.setGain(new_kp, new_ki, new_kd);
+
+                Serial.printf("[✓] Updated PID → kp: %.3f, ki: %.3f, kd: %.3f\n",
+                              stepper.getKp(), stepper.getKi(), stepper.getKd());
+
+                // Re-run the same position command with new PID
+                stepper.setPositionCommand(target_pos, max_vel, max_acc);
+            } else {
+                Serial.println("[✗] Invalid format. Example: 1.2 0.01 0.05");
+            }
+        }
+
+        // 2) Run control loop continuously
+        static unsigned long lastUpdate = millis();
+        unsigned long now = millis();
+        float dt = (now - lastUpdate) / 1000.0f;
+        lastUpdate = now;
+
+        stepper.runMotor(dt);
+
+        // Print live feedback
+        Serial.printf("Pos: %.2f | Target: %.2f | Vel: %.2f | kp: %.2f ki: %.2f kd: %.2f\n",
+                      stepper.pos_, target_pos, stepper.vel_, stepper.getKp(), stepper.getKi(), stepper.getKd());
+
+        delay(20);
+    }
 }
 
 void setup() {
@@ -110,20 +218,21 @@ void setup() {
     delay(1000);
     Serial.println("===== BEGINNING UNIT TESTS =====");
 
-    CANbus::begin();  // Optional for test mode
+    CANbus::begin();
+
     test_CAN_receiver();
     delay(1000);
-
     test_CAN_enc_feedback();
     delay(1000);
-
     test_MotorController();
     delay(1000);
-
-    test_StepperMotor_pid();
+    test_StepperMotor_position();
     delay(1000);
-
+    test_StepperMotor_speed();
+    delay(1000);
     test_system();
+    delay(1000);
+    tune_PID();
     delay(1000);
 
     Serial.println("===== ALL UNIT TESTS COMPLETE =====");

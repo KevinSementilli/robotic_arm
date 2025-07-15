@@ -78,7 +78,7 @@ void StepperMotor::runPositionControl(float dt) {
     prev_error = error;
 
     // Raw PID velocity demand
-    float desired_vel = kp * error + ki * integral + kd * derivative;
+    float desired_vel = kp_ * error + ki_ * integral + kd_ * derivative;
 
     // --- Apply Velocity Constraints ---
     if (desired_vel > cmd_vel_) desired_vel = cmd_vel_;
@@ -111,7 +111,7 @@ void StepperMotor::runSpeedControl(float dt) {
     float derivative = (vel_error - prev_error) / dt;
     prev_error = vel_error;
 
-    float target_vel = kp * vel_error + ki * integral + kd * derivative;
+    float target_vel = kp_ * vel_error + ki_ * integral + kd_ * derivative;
 
     // Clamp acceleration
     static float last_output_vel = 0;

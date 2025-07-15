@@ -26,6 +26,10 @@ public:
     // Command inputs from CAN
     void setPositionCommand(float pos, float vel, float acc);
     void setSpeedCommand(float vel, float acc);
+    void setGain(float kp, float ki, float kd) { kp_ = kp; ki_ = ki; kd_ = kd; }
+    float getKp() { return kp_;}
+    float getKi() { return ki_; }
+    float getKd() { return kd_; }
 
     void runMotor(float dt);
     void runPositionControl(float dt);
@@ -38,7 +42,7 @@ public:
 private:
 
     MotorController controller_;
-    float kp = 1, ki = 0, kd = 0; // PID gains
+    float kp_ = 1, ki_ = 0, kd_ = 0; // PID gains
 
     AS5600 encoder_;
     uint16_t last_raw_angle_ = 0;
