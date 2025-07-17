@@ -1,13 +1,15 @@
 #include <Arduino.h>
 #include "CANbus.h"
-#include "test.cpp"
 
 #define DEBUG 1
+#if DEBUG
+    #include "test.cpp"
+#endif
 
 void setup() {
 
     #if DEBUG
-        includeTesting();
+        includeTesting(); // Run unit tests
     #endif
 
 }

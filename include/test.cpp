@@ -1,3 +1,6 @@
+#ifndef TEST_CPP
+#define TEST_CPP
+
 #include <Arduino.h>
 #include "CANbus.h"
 
@@ -237,3 +240,5 @@ void includeTesting() {
 
     Serial.println("===== ALL UNIT TESTS COMPLETE =====");
 }
+
+#endif // TEST_CPP
