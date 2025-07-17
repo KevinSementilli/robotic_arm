@@ -127,19 +127,3 @@ Low-level motor driver interface.
 ### **AS5600 Encoders**
 - Motor 0: **SDA=21, SCL=22** (`Wire`)  
 - Motor 1: **SDA=25, SCL=26** (`Wire1`)
-
----
-
-## **Installation**
-
-### **1. PlatformIO `platformio.ini`**
-
-```ini
-[env:esp32dev]
-platform = espressif32
-board = esp32dev
-framework = arduino
-monitor_speed = 115200
-
-lib_deps =
-    robtillaart/AS5600@^0.6.5
