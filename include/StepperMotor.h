@@ -41,13 +41,19 @@ public:
 
 private:
 
+    // RPM increment per cycle
+    float computeAccel(float dt);
+
     MotorController controller_;
     float kp_ = 1, ki_ = 0, kd_ = 0; // PID gains
 
     AS5600 encoder_;
     uint16_t last_raw_angle_ = 0;
     float last_angle_deg_ = 0;
+    float cumulative_angle_deg_ = 0.0f;
     uint8_t id_ = 0;
+
+
 };
 
 #endif // STEPPERMOTOR_H

@@ -5,6 +5,8 @@
 #include <CAN.h>
 #include "StepperMotor.h"
 
+class StepperMotor; // Forward declaration
+
 class CANbus {
 public:
     static StepperMotor* motor[2];
@@ -20,7 +22,7 @@ public:
  
 private:
 
-    static bool checkCRC(uint32_t can_id, const uint8_t* buffer, int len, uint8_t crc);
+    static uint8_t computeCRC(uint32_t can_id, const uint8_t* buffer, int len);
     static void processFrame(uint32_t id, uint8_t code, const uint8_t* data, uint8_t len);
 
 };
