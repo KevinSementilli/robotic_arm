@@ -54,13 +54,13 @@
         </collision>
     </link>
 
-    <joint name="base_joint" type="fixed">
+    <joint name="bottom_base_joint" type="fixed">
         <parent link="world"/>
         <child link="bottom_base"/>
         <origin xyz="0 0 0" rpy="0 0 0"/>
     </joint>
 
-    <joint name="top_base_joint" type="revolute">
+    <joint name="base_joint" type="revolute">
         <parent link="bottom_base"/>
         <child link="top_base"/>
         <origin xyz="0 0 0.045" rpy="0 0 0"/>
@@ -200,5 +200,4 @@
         <limit lower="-${pi}" upper="${pi}" effort="100" velocity="1"/>
     </joint>
     
-
 </robot>

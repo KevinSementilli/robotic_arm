@@ -11,20 +11,17 @@ enum class CommandMode { SPEED, POSITION };
 class StepperMotor
 {
 public:
-
-    double cmd_pos = 0;
-    double cmd_vel = 0;
-    double cmd_acc = 0;
+    std::string name_;
     double pos = 0;
     double vel = 0;
     double acc = 0;
 
-    StepperMotor(int CAN_id, CANComms &comms, const rclcpp::Logger &logger)
-        : CAN_id_(CAN_id), comms_(comms), logger_(logger) {}
+    StepperMotor(std::string name, CANComms &comms, const rclcpp::Logger &logger, uint16_t CAN_id)
+        : name_(name), comms_(comms), logger_(logger), CAN_id_(CAN_id) {}
 
     // Send command in speed mode (F6)
-    bool send_speed(uint16_t rpm, uint8_t acc, bool clockwise = true)
-    {
+    bool send_speed(uint16_t rpm, uint8_t acc, bool clockwise = true) {
+        
         if (rpm > 3000) rpm = 3000;
 
         uint8_t dir = clockwise ? 0x00 : 0x80; // bit7 = 1 for CCW, 0 for CW
@@ -38,8 +35,8 @@ public:
     }
 
     // Send command in position mode 4 (F5) - absolute motion by axis
-    bool send_absolute_position(int32_t abs_axis, uint16_t rpm, uint8_t acc)
-    {
+    bool send_absolute_position(int32_t abs_axis, uint16_t rpm, uint8_t acc) {
+
         if (rpm > 3000) rpm = 3000;
         if (abs_axis < -8388607) abs_axis = -8388607;
         if (abs_axis > 8388607) abs_axis = 8388607;
@@ -58,8 +55,7 @@ public:
     }
 
     // Query speed (command 0x32)
-    int16_t read_speed()
-    {
+    int16_t read_speed() {
         std::vector<uint8_t> query = {0x32};
         if (!comms_.send_frame(CAN_id_, query)) {
             RCLCPP_ERROR(logger_, "Failed to send speed query (0x32)");
@@ -81,8 +77,7 @@ public:
     }
 
     // Query encoder position (command 0x31)
-    int64_t read_encoder_position()
-    {
+    int64_t read_encoder_position() {
         std::vector<uint8_t> query = {0x30};
         if (!comms_.send_frame(CAN_id_, query)) {
             RCLCPP_ERROR(logger_, "Failed to send encoder position query (0x30)");
@@ -108,8 +103,8 @@ public:
     }
 
     // Set microstepping using command 0x84
-    bool set_microsteps(uint8_t microstep_value)
-    {
+    bool set_microsteps(uint8_t microstep_value) {
+        
         if (microstep_value == 0)
         {
             RCLCPP_WARN(logger_, "Invalid microstep value: 0");
@@ -121,9 +116,11 @@ public:
     }
 
 private:
-    uint8_t CAN_id_;
+
+    uint16_t CAN_id_;
     CANComms &comms_;
     rclcpp::Logger logger_;
+    CommandMode cmd_mode_;
 };
 
 #endif // ROBOTIC_ARM_STEPPER_HPP

@@ -22,14 +22,25 @@ namespace robotic_arm {
             return hardware_interface::CallbackReturn::ERROR;
         }
 
-        cfg_.carrier_name = info_.hardware_parameters["carrier_name"];
-        cfg_.central_bevel_name = info_.hardware_parameters["central_bevel_name"];
-        cfg_.device = info_.hardware_parameters["device"];
-        cfg_.CAN_rate = std::stoi(info_.hardware_parameters["CAN_rate"]);
-        cfg_.timout_ms = std::stoi(info_.hardware_parameters["timeout_ms"]);
+        cfg_.joint_names.reserve(info_.joints.size());
+        cfg_.joint_reductions.reserve(info_.joints.size());
 
-        carrier_.name = cfg_.carrier_name;
-        central_bevel_.name = cfg_.central_bevel_name;
+        // Extract joint names and reductions from hardware parameters
+        for (const auto &joint : info_.joints) {
+            cfg_.joint_names.push_back(joint.name);
+        
+            // reduction is expected to be provided as "<joint_name>_reduction" in hardware parameters
+            auto reduction_key = joint.name + "_reduction";
+            if (info_.hardware_parameters.count(reduction_key)) {
+                cfg_.joint_reductions.push_back(std::stod(info_.hardware_parameters.at(reduction_key)));
+            } else {
+                RCLCPP_WARN(logger_, "No reduction specified for %s, defaulting to 1.0", joint.name.c_str());
+                cfg_.joint_reductions.push_back(1.0f);
+            }
+        }
+
+        cfg_.interface_name = info_.hardware_parameters["interface_name"];
+        cfg_.CAN_rate = std::stoi(info_.hardware_parameters["CAN_rate"]);
 
         RCLCPP_INFO(logger_, "info passed successfully!");
 
@@ -53,6 +64,7 @@ namespace robotic_arm {
               cmds[1].name == hardware_interface::HW_IF_ACCELERATION)
           {
               cmd_mode_ = "speed";
+              RCLCPP_INFO(logger_, "Hardware interface is in speed mode");
           }
           else if (cmds.size() == 3 &&
                    cmds[0].name == hardware_interface::HW_IF_POSITION &&
@@ -60,6 +72,7 @@ namespace robotic_arm {
                    cmds[2].name == hardware_interface::HW_IF_ACCELERATION)
           {
               cmd_mode_ = "position";
+              RCLCPP_INFO(logger_, "Hardware interface is in position mode");
           }
           else
           {
@@ -82,76 +95,37 @@ namespace robotic_arm {
         return hardware_interface::CallbackReturn::SUCCESS;
     }
 
-    // hardware_interface::CallbackReturn StepperSystemHardware::on_configure(
-    //         const rclcpp_lifecycle::State & previous_state) 
-    // {
-    // }
+    hardware_interface::CallbackReturn StepperSystemHardware::on_configure(
+            const rclcpp_lifecycle::State & /*previous_state*/) {
+        
+        motors.clear();
+        motors.reserve(cfg_.joint_names.size());
+
+        RCLCPP_INFO(logger_, "Configuring %zu stepper motors...",
+                    cfg_.joint_names.size());
+
+        for (size_t i = 0; i < cfg_.joint_names.size(); i++) {
+            
+            uint16_t CAN_id = 0x00 + i;
+            RCLCPP_INFO(logger_, "[%zu] Joint '%s' assigned CAN ID: 0x%X", i, cfg_.joint_names[i].c_str(), CAN_id);
+            motors.emplace_back(cfg_.joint_names[i], comms_, logger_, CAN_id);
+        }
+
+        return hardware_interface::CallbackReturn::SUCCESS;
+    }
 
     // hardware_interface::CallbackReturn StepperSystemHardware::on_cleanup(
     //         const rclcpp_lifecycle::State & previous_state) 
     // {
     
     // }
-    
-    std::vector<hardware_interface::StateInterface> StepperSystemHardware::export_state_interfaces() 
-    {
-      std::vector<hardware_interface::StateInterface> state_interfaces;
-
-      state_interfaces.emplace_back(hardware_interface::StateInterface(
-          carrier_.name, hardware_interface::HW_IF_POSITION, &carrier_.pos));
-      state_interfaces.emplace_back(hardware_interface::StateInterface(
-          carrier_.name, hardware_interface::HW_IF_VELOCITY, &carrier_.vel));
-
-      state_interfaces.emplace_back(hardware_interface::StateInterface(
-          central_bevel_.name, hardware_interface::HW_IF_POSITION, &central_bevel_.pos));
-      state_interfaces.emplace_back(hardware_interface::StateInterface(
-        central_bevel_.name, hardware_interface::HW_IF_VELOCITY, &central_bevel_.vel));
-
-      return state_interfaces;
-    }
-
-  std::vector<hardware_interface::CommandInterface> StepperSystemHardware::export_command_interfaces()
-  {
-    std::vector<hardware_interface::CommandInterface> command_interfaces;
-
-    // If in position mode, export position interfaces first
-    if (cmd_mode_ == "position")
-    {
-      command_interfaces.emplace_back(hardware_interface::CommandInterface(
-          carrier_.name, hardware_interface::HW_IF_POSITION, &carrier_.cmd_pos));
-      command_interfaces.emplace_back(hardware_interface::CommandInterface(
-          central_bevel_.name, hardware_interface::HW_IF_POSITION, &central_bevel_.cmd_pos));
-    }
-
-    // Always export velocity and acceleration
-    command_interfaces.emplace_back(hardware_interface::CommandInterface(
-        carrier_.name, hardware_interface::HW_IF_VELOCITY, &carrier_.cmd_vel));
-    command_interfaces.emplace_back(hardware_interface::CommandInterface(
-        central_bevel_.name, hardware_interface::HW_IF_VELOCITY, &central_bevel_.cmd_vel));
-
-    command_interfaces.emplace_back(hardware_interface::CommandInterface(
-        carrier_.name, hardware_interface::HW_IF_ACCELERATION, &carrier_.cmd_acc));
-    command_interfaces.emplace_back(hardware_interface::CommandInterface(
-        central_bevel_.name, hardware_interface::HW_IF_ACCELERATION, &central_bevel_.cmd_acc));
-
-    return command_interfaces;
-  }
-
 
     hardware_interface::CallbackReturn StepperSystemHardware::on_activate(
-            const rclcpp_lifecycle::State & /*previous_state*/) 
-    {
-        RCLCPP_INFO(logger_, "Activating ...please wait...");
+        const rclcpp_lifecycle::State & /*previous_state*/) {
+        
+        RCLCPP_INFO(logger_, "Activating CAN device: %s, bitrate: %d", cfg_.interface_name.c_str(), cfg_.CAN_rate);
 
-        const auto start_time = std::chrono::steady_clock::now();
-        const auto timeout_duration = std::chrono::milliseconds(cfg_.timout_ms);
-
-        while(!comms_.connect(cfg_.device, cfg_.CAN_rate)) {
-            auto elapsed_time = std::chrono::steady_clock::now() - start_time;
-            if (elapsed_time > timeout_duration) {
-                RCLCPP_ERROR(logger_, "Failed to connect to CAN device %s after %d ms", cfg_.device.c_str(), cfg_.timout_ms);
-                return hardware_interface::CallbackReturn::ERROR;
-            }
+        while(!comms_.connect(cfg_.interface_name, cfg_.CAN_rate)) {
 
             RCLCPP_WARN(logger_, "CAN device not connected, retrying ...");
             rclcpp::sleep_for(std::chrono::milliseconds(200));
@@ -162,73 +136,164 @@ namespace robotic_arm {
     }
 
     hardware_interface::CallbackReturn StepperSystemHardware::on_deactivate(
-            const rclcpp_lifecycle::State & /*previous_state*/) 
-    {
+        const rclcpp_lifecycle::State & /*previous_state*/) {
+
       RCLCPP_INFO(logger_, "Deactivating hardware interface...");
-
-      // connect to arduino with device, baud_rate and timeout_ms parameters
-      comms_.disconnect(cfg_.device);
-
+      comms_.disconnect(cfg_.interface_name);
       RCLCPP_INFO(logger_, "Successfully deactivated!");
 
       return hardware_interface::CallbackReturn::SUCCESS;
     }
+    
+    std::vector<hardware_interface::StateInterface> StepperSystemHardware::export_state_interfaces() {
+        
+        std::vector<hardware_interface::StateInterface> state_interfaces;
+
+        for (int i = 0; i < motors.size(); i++) {
+            state_interfaces.emplace_back(hardware_interface::StateInterface(
+                cfg_.joint_names[i], hardware_interface::HW_IF_POSITION, &states[i][0]));
+            state_interfaces.emplace_back(hardware_interface::StateInterface(
+                cfg_.joint_names[i], hardware_interface::HW_IF_VELOCITY, &states[i][1]));
+        }
+
+      return state_interfaces;
+    }
+
+    std::vector<hardware_interface::CommandInterface> StepperSystemHardware::export_command_interfaces() {
+        
+        std::vector<hardware_interface::CommandInterface> command_interfaces;
+
+        // If in position mode, export position interfaces first
+        if (cmd_mode_ == "position")
+        {
+            for (int i = 0; i < motors.size(); i++) {
+                command_interfaces.emplace_back(hardware_interface::CommandInterface(
+                    cfg_.joint_names[i], hardware_interface::HW_IF_POSITION, &commands[i][0]));
+            }
+        }
+        
+        for (int i = 0; i < motors.size(); i++) {
+            command_interfaces.emplace_back(hardware_interface::CommandInterface(
+                cfg_.joint_names[i], hardware_interface::HW_IF_VELOCITY, &commands[i][1]));
+            command_interfaces.emplace_back(hardware_interface::CommandInterface(
+                cfg_.joint_names[i], hardware_interface::HW_IF_ACCELERATION, &commands[i][2]));
+        }
+
+        return command_interfaces;
+    }
 
     hardware_interface::return_type StepperSystemHardware::read(
             const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) 
-    {
-        // Read the current speed of the motors
-        // diff_motor_L_.vel = diff_motor_L_.read_speed();
-        // diff_motor_R_.vel = diff_motor_R_.read_speed();
+    {   
+        for (int i = 0; i < motors.size(); i++) {
+            motors[i].pos = motors[i].read_encoder_position();
+            motors[i].vel = motors[i].read_speed();
+        }
 
-        // // Read the current position of the motors
-        // diff_motor_L_.pos = diff_motor_L_.read_encoder_position();
-        // diff_motor_R_.pos = diff_motor_R_.read_encoder_position();
+        for (int i = 0; i < motors.size() - 2; i++) {
+            states[i][0] = motors[i].pos / cfg_.joint_reductions[i];
+            states[i][1] = motors[i].vel / cfg_.joint_reductions[i];
+        }
 
-        // // Compute the carrier and central bevel positions and velocities
-        // carrier_.pos = (diff_motor_L_.pos + diff_motor_R_.pos) / (pulley_ratio_ * bevel_gear_ratio_);
-        // carrier_.vel = (diff_motor_L_.vel + diff_motor_R_.vel) / (pulley_ratio_ * bevel_gear_ratio_);
-        // central_bevel_.pos = (diff_motor_L_.pos - diff_motor_R_.pos) / (pulley_ratio_ * bevel_gear_ratio_);
-        // central_bevel_.vel = (diff_motor_L_.vel - diff_motor_R_.vel) / (pulley_ratio_ * bevel_gear_ratio_);
+        // differential gearbox mechanism
+        states[4][0] = (motors[4].pos / cfg_.joint_reductions[4] + motors[5].pos / cfg_.joint_reductions[4]) / 2;
+        states[4][1] = (motors[4].vel / cfg_.joint_reductions[4] + motors[5].vel / cfg_.joint_reductions[4]) / 2;
+
+        states[5][0] = (motors[4].pos / cfg_.joint_reductions[4] - motors[5].pos / cfg_.joint_reductions[4]) / 2;
+        states[5][1] = (motors[4].vel / cfg_.joint_reductions[4] - motors[5].vel / cfg_.joint_reductions[4]) / 2;
 
         return hardware_interface::return_type::OK;
     }
 
     hardware_interface::return_type StepperSystemHardware::write(
-            const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) 
-    {
-        set_motor_cmd();
-        if (cmd_mode_ == "speed")
-        {
-                            
-            bool dir = diff_motor_L_.cmd_vel >= 0;
-            uint16_t rpm = static_cast<uint16_t>(std::abs(diff_motor_L_.cmd_vel));
-            uint8_t acc = static_cast<uint8_t>(diff_motor_L_.cmd_acc);
+            const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) {
+        
+        if (cmd_mode_ == "position") {
+            
+            for (int i = 0; i < motors.size() - 2; i++) {
+                if(!motors[i].send_absolute_position(
+                    static_cast<int32_t>(commands[i][0] * cfg_.joint_reductions[i]),
+                    static_cast<uint16_t>(commands[i][1] * cfg_.joint_reductions[i]),
+                    static_cast<uint8_t>(commands[i][2] * cfg_.joint_reductions[i])))
+                {
+                    RCLCPP_ERROR(logger_, "Failed to send position command to motor %s", motors[i].name_.c_str());
+                    return hardware_interface::return_type::ERROR;
+                }
+            }
 
-            diff_motor_L_.send_speed(rpm, acc, dir);
+            differentialPositionCommand();
 
-            dir = diff_motor_R_.cmd_vel >= 0;
-            rpm = static_cast<uint16_t>(std::abs(diff_motor_R_.cmd_vel));
-            acc = static_cast<uint8_t>(diff_motor_R_.cmd_acc);
+        } else {
+            
+            for(int i = 0; i < motors.size() - 2; i++) {
+                if(!motors[i].send_speed(
+                    static_cast<uint16_t>(commands[i][1] * cfg_.joint_reductions[i]),
+                    static_cast<uint8_t>(commands[i][2] * cfg_.joint_reductions[i]),
+                    commands[i][1] > 0))
+                {
+                    RCLCPP_ERROR(logger_, "Failed to send speed command to motor %s", motors[i].name_.c_str());
+                    return hardware_interface::return_type::ERROR;
+                }
+            }
 
-            diff_motor_R_.send_speed(rpm, acc, dir);
-        }
-        else {
-
-            int32_t abs_pos = static_cast<int32_t>(diff_motor_L_.cmd_pos);
-            uint16_t rpm = static_cast<uint16_t>(std::abs(diff_motor_L_.cmd_vel));  
-            uint8_t acc = static_cast<uint8_t>(diff_motor_L_.cmd_acc);
-
-            diff_motor_L_.send_absolute_position(abs_pos, rpm, acc);
-
-            abs_pos = static_cast<int32_t>(diff_motor_R_.cmd_pos);
-            rpm = static_cast<uint16_t>(std::abs(diff_motor_R_.cmd_vel));
-            acc = static_cast<uint8_t>(diff_motor_R_.cmd_acc);
-
-            diff_motor_R_.send_absolute_position(abs_pos, rpm, acc);
+            differentialSpeedCommand();
         }
 
         return hardware_interface::return_type::OK;
+    }
+    
+    hardware_interface::return_type StepperSystemHardware::differentialPositionCommand() {
+
+        double carrier_pos = commands[4][0];
+        double carrier_vel = commands[4][1];
+        double carrier_acc = commands[4][2];
+            
+        double bevel_pos = commands[5][0];
+        double bevel_vel = commands[5][1];
+        double bevel_acc = commands[5][2];
+
+        if(!motors[4].send_absolute_position(
+            static_cast<int32_t>(cfg_.joint_reductions[4] * (carrier_pos + bevel_pos)),
+            static_cast<uint16_t>(cfg_.joint_reductions[4] * (carrier_vel + bevel_vel)),
+            static_cast<uint8_t>(cfg_.joint_reductions[4] * (carrier_acc + bevel_acc))))
+        {
+            RCLCPP_ERROR(logger_, "Failed to send position command to motor %s", motors[4].name_.c_str());
+            return hardware_interface::return_type::ERROR;
+        }
+
+        if(!motors[5].send_absolute_position(
+            static_cast<int32_t>(cfg_.joint_reductions[5] * (carrier_pos - bevel_pos)),
+            static_cast<uint16_t>(cfg_.joint_reductions[5] * (carrier_vel - bevel_vel)),
+            static_cast<uint8_t>(cfg_.joint_reductions[5] * (carrier_acc - bevel_acc))))
+        {
+            RCLCPP_ERROR(logger_, "Failed to send position command to motor %s", motors[4].name_.c_str());
+            return hardware_interface::return_type::ERROR;
+        }
+    } 
+
+    hardware_interface::return_type StepperSystemHardware::differentialSpeedCommand() {
+
+        double carrier_vel = commands[4][1];
+        double carrier_acc = commands[4][2];
+            
+        double bevel_vel = commands[5][1];
+        double bevel_acc = commands[5][2];
+
+        if(!motors[4].send_speed(
+            static_cast<uint16_t>(cfg_.joint_reductions[4] * (carrier_vel + bevel_vel)),
+            static_cast<uint8_t>(cfg_.joint_reductions[4] * (carrier_acc + bevel_acc))))
+        {
+            RCLCPP_ERROR(logger_, "Failed to send speed command to motor %s", motors[4].name_.c_str());
+            return hardware_interface::return_type::ERROR;
+        }
+
+        if(!motors[5].send_speed(
+            static_cast<uint16_t>(cfg_.joint_reductions[5] * (carrier_vel - bevel_vel)),
+            static_cast<uint8_t>(cfg_.joint_reductions[5] * (carrier_acc - bevel_acc))))
+        {
+            RCLCPP_ERROR(logger_, "Failed to send speed command to motor %s", motors[5].name_.c_str());
+            return hardware_interface::return_type::ERROR;
+        }
     }
 
 } // namespace robotic_arm

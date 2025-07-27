@@ -5,14 +5,62 @@
         <ros2_control name="StepperSystemHardware" type="system">
             <hardware>    
                 <plugin>robotic_arm/StepperSystemHardware</plugin>
-                <param name="carrier_name">carrier_joint</param>
-                <param name="central_bevel_name">bevel_joint</param>
+
+                <param name="base_name">base_joint</param>
+                <param name="base_joint_reduction">16</param>
+
+                <param name="shoulder_name">shoulder_joint</param>
+                <param name="shoulder_joint_reduction">16</param>
+
+                <param name="elbow_name">elbow_joint</param>
+                <param name="elbow_joint_reduction">16</param>
+
+                <param name="forearm_name">forearm_joint</param>
+                <param name="forearm_joint_reduction">16</param>
+
+                <param name="wrist_carrier_name">wrist_carrier_joint</param>
+                <param name="wrist_bevel_name">wrist_bevel_joint</param>
+                <param name="wrsit_carrier_joint_reduction">16</param>
+                <param name="wrist_bevel_joint_reduction">16</param>
+
                 <param name="device">can0</param>
                 <param name="CAN_rate">500000</param>
-                <param name="timeout_ms">5000</param>
             </hardware>
 
-            <joint name="carrier_joint">
+            <joint name="base_joint">
+                <xacro:if value="${cmd_mode == 'position'}"> 
+                    <command_interface name="position"/>
+                </xacro:if>
+                <command_interface name="velocity"/>
+                <command_interface name="acceleration"/>
+                
+                <state_interface name="position"/>
+                <state_interface name="velocity"/>
+            </joint>
+            
+            <joint name="shoulder_joint">
+                <xacro:if value="${cmd_mode == 'position'}"> 
+                    <command_interface name="position"/>
+                </xacro:if>
+                <command_interface name="velocity"/>
+                <command_interface name="acceleration"/>
+                
+                <state_interface name="position"/>
+                <state_interface name="velocity"/>
+            </joint>
+
+            <joint name="elbow_joint">
+                <xacro:if value="${cmd_mode == 'position'}"> 
+                    <command_interface name="position"/>
+                </xacro:if>
+                <command_interface name="velocity"/>
+                <command_interface name="acceleration"/>
+                
+                <state_interface name="position"/>
+                <state_interface name="velocity"/>
+            </joint>
+
+            <joint name="forearm_joint">
                 <xacro:if value="${cmd_mode == 'position'}"> 
                     <command_interface name="position"/>
                 </xacro:if>
@@ -24,6 +72,29 @@
             </joint>
 
             <joint name="bevel_joint">
+                <xacro:if value="${cmd_mode == 'position'}">
+                    <command_interface name="position"/>
+                </xacro:if>
+                <command_interface name="velocity"/>
+                <command_interface name="acceleration"/>
+
+                <state_interface name="position"/>
+                <state_interface name="velocity"/>
+            </joint>
+        </ros2_control> 
+
+            <joint name="wrist_carrier_joint">
+                <xacro:if value="${cmd_mode == 'position'}"> 
+                    <command_interface name="position"/>
+                </xacro:if>
+                <command_interface name="velocity"/>
+                <command_interface name="acceleration"/>
+                
+                <state_interface name="position"/>
+                <state_interface name="velocity"/>
+            </joint>
+
+            <joint name="wrist_bevel_joint">
                 <xacro:if value="${cmd_mode == 'position'}">
                     <command_interface name="position"/>
                 </xacro:if>
