@@ -15,19 +15,14 @@ def generate_launch_description():
 
     package_name='robotic_arm'
 
+    HW_mode = LaunchConfiguration('HW_mode')
     cmd_mode = LaunchConfiguration('cmd_mode')
-    real_time = LaunchConfiguration('real_time')
 
     # launch robot_state_publisher 
     rsp = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             [os.path.join(get_package_share_directory(package_name), 'launch/include' ,'rsp.launch.py')]), 
-            launch_arguments={'cmd_mode': cmd_mode, 'real_time': real_time}.items()
-    )
-
-    teleop_twist_node = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            [os.path.join(get_package_share_directory(package_name), 'launch/include' ,'twist_joy.launch.py')]), 
+            launch_arguments={'HW_mode': HW_mode, 'cmd_mode': cmd_mode}.items()
     )
 
     controller_config = os.path.join(
@@ -68,7 +63,7 @@ def generate_launch_description():
     joint_broad_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["joint_broadcaster"],
+        arguments=["joint_state_broadcaster"],
         output="screen",
     )
 
@@ -80,20 +75,17 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-
+        DeclareLaunchArgument(
+            'HW_mode',
+            default_value='mock',
+            description='Options : mock, real, gazebo'),
         DeclareLaunchArgument(
             'cmd_mode',
-            default_value='speed',
-            description='Use sim time if true'),
-
-        DeclareLaunchArgument(
-            'real_time',
-            default_value='false',
-            description='Use real time if true'),
+            default_value='position',
+            description='choose between position and speed control'),
 
         rsp,
         delayed_controller_manager,
         delayed_vel_controller_spawner,
         delayed_joint_broad_spawner,
-        teleop_twist_node,
     ])

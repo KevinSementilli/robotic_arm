@@ -6,18 +6,28 @@
 #include <string>
 #include <rclcpp/rclcpp.hpp>
 
-enum class CommandMode { SPEED, POSITION };
-
 class StepperMotor
 {
 public:
     std::string name_;
+    double gear_reduction = 1.0;
     double pos = 0;
     double vel = 0;
     double acc = 0;
+    
+    StepperMotor(std::string name, 
+                 double reduction, 
+                 uint16_t CAN_id,
+                 const rclcpp::Logger &logger)
+        : name_(std::move(name)), 
+        gear_reduction(reduction),  
+        CAN_id_(CAN_id),
+        logger_(logger) {}
 
-    StepperMotor(std::string name, CANComms &comms, const rclcpp::Logger &logger, uint16_t CAN_id)
-        : name_(name), comms_(comms), logger_(logger), CAN_id_(CAN_id) {}
+    bool attachComms(CANComms &comms) {
+        comms_ = &comms;
+        return comms_ != nullptr;
+    }
 
     // Send command in speed mode (F6)
     bool send_speed(uint16_t rpm, uint8_t acc, bool clockwise = true) {
@@ -31,7 +41,7 @@ public:
         uint8_t byte3 = low;
 
         std::vector<uint8_t> payload = {0xF6, byte2, byte3, acc};
-        return comms_.send_frame(CAN_id_, payload);
+        return comms_->send_frame(CAN_id_, payload);
     }
 
     // Send command in position mode 4 (F5) - absolute motion by axis
@@ -51,19 +61,19 @@ public:
             (uint8_t)((abs_axis >> 16) & 0xFF)
         };
 
-        return comms_.send_frame(CAN_id_, payload);
+        return comms_->send_frame(CAN_id_, payload);
     }
 
     // Query speed (command 0x32)
     int16_t read_speed() {
         std::vector<uint8_t> query = {0x32};
-        if (!comms_.send_frame(CAN_id_, query)) {
-            RCLCPP_ERROR(logger_, "Failed to send speed query (0x32)");
+        if (!comms_->send_frame(CAN_id_, query)) {
+            RCLCPP_ERROR(logger_, "[Motor %d]: Failed to send speed query (0x32)", CAN_id_);
             return 0;
         }
 
         struct can_frame response;
-        if (comms_.receive_frame(response))
+        if (comms_->receive_frame(response))
         {
             if (response.data[0] == 0x32)
             {
@@ -72,20 +82,20 @@ public:
             }
         }
 
-        RCLCPP_ERROR(logger_, "Failed to receive speed response (0x32)");
+        RCLCPP_ERROR(logger_, "[Motor %d]: Failed to receive speed response (0x32)", CAN_id_);
         return 0;
     }
 
     // Query encoder position (command 0x31)
     int64_t read_encoder_position() {
         std::vector<uint8_t> query = {0x30};
-        if (!comms_.send_frame(CAN_id_, query)) {
-            RCLCPP_ERROR(logger_, "Failed to send encoder position query (0x30)");
+        if (!comms_->send_frame(CAN_id_, query)) {
+            RCLCPP_ERROR(logger_, "[Motor %d]: Failed to send encoder position query (0x30)", CAN_id_);
             return 0;
         }
 
         struct can_frame response;
-        if (comms_.receive_frame(response))
+        if (comms_->receive_frame(response))
         {
             if (response.data[0] == 0x31)
             {
@@ -98,7 +108,7 @@ public:
             }
         }
 
-        RCLCPP_ERROR(logger_, "Failed to receive encoder position (0x30)");
+        RCLCPP_ERROR(logger_, "[Motor %d]: Failed to receive encoder position (0x30)", CAN_id_);
         return 0;
     }
 
@@ -112,15 +122,14 @@ public:
         }
 
         std::vector<uint8_t> payload = {0x84, microstep_value};
-        return comms_.send_frame(CAN_id_, payload);
+        return comms_->send_frame(CAN_id_, payload);
     }
 
 private:
 
+    CANComms* comms_ = nullptr;
     uint16_t CAN_id_;
-    CANComms &comms_;
     rclcpp::Logger logger_;
-    CommandMode cmd_mode_;
 };
 
 #endif // ROBOTIC_ARM_STEPPER_HPP

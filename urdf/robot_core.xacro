@@ -36,6 +36,11 @@
                 <mesh filename="package://robotic_arm/meshes/bottom_base.stl" scale="${scale_factor}"/>
             </geometry>
         </collision>
+        <inertial>
+            <origin xyz="0 0 0.0225" rpy="0 0 0"/>
+            <mass value="0.5"/>
+            <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+        </inertial>
     </link>
 
     <link name="top_base">
@@ -52,6 +57,11 @@
                 <mesh filename="package://robotic_arm/meshes/top_base.stl" scale="${scale_factor}"/>
             </geometry>
         </collision>
+        <inertial>
+            <origin xyz="0 0 0.1" rpy="0 0 0"/>
+            <mass value="0.8"/>
+            <inertia ixx="0.002" ixy="0.0" ixz="0.0" iyy="0.002" iyz="0.0" izz="0.001"/>
+        </inertial>
     </link>
 
     <joint name="bottom_base_joint" type="fixed">
@@ -86,6 +96,11 @@
                 <mesh filename="package://robotic_arm/meshes/shoulder.stl" scale="${scale_factor}"/>
             </geometry>
         </collision>
+        <inertial>
+            <origin xyz="0.03615 0 0.20655" rpy="0 0 0"/>
+            <mass value="0.6"/>
+            <inertia ixx="0.003" ixy="0.0" ixz="0.0" iyy="0.003" iyz="0.0" izz="0.0005"/>
+        </inertial>
     </link>
 
     <joint name="shoulder_joint" type="revolute">
@@ -114,6 +129,11 @@
                 <mesh filename="package://robotic_arm/meshes/elbow.stl" scale="${scale_factor}"/>
             </geometry>
         </collision>
+        <inertial>
+            <origin xyz="-0.00475 0.055 0.0556" rpy="0 0 0"/>
+            <mass value="0.5"/>
+            <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.0005"/>
+        </inertial>
     </link>
 
     <joint name="elbow_joint" type="revolute">
@@ -142,6 +162,11 @@
                 <mesh filename="package://robotic_arm/meshes/forearm.stl" scale="${scale_factor}"/>
             </geometry>
         </collision>
+        <inertial>
+            <origin xyz="0 0.128 0" rpy="-${pi/2} 0 0"/>
+            <mass value="0.4"/>
+            <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.0005" iyz="0.0" izz="0.001"/>
+        </inertial>
     </link>
 
     <joint name="forearm_joint" type="revolute">
@@ -166,6 +191,11 @@
                 <mesh filename="package://robotic_arm/meshes/wrist_carrier.stl" scale="${scale_factor}"/>
             </geometry>
         </collision>
+        <inertial>
+            <origin xyz="0 0 0.01995" rpy="0 0 0"/>
+            <mass value="0.2"/>
+            <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+        </inertial>
     </link>
 
     <joint name="wrist_carrier_joint" type="revolute">
@@ -190,6 +220,11 @@
                 <mesh filename="package://robotic_arm/meshes/wrist_bevel.stl" scale="${scale_factor}"/>
             </geometry>
         </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <mass value="0.1"/>
+            <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+        </inertial>
     </link>
 
     <joint name="wrist_bevel_joint" type="revolute">
@@ -199,5 +234,11 @@
         <axis xyz="0 0 1"/>
         <limit lower="-${pi}" upper="${pi}" effort="100" velocity="1"/>
     </joint>
+
+    <!-- ****************************************************************************************** -->
+    <!-- **************************************** Claw ******************************************** -->
+    <!-- ****************************************************************************************** -->
+
+
     
 </robot>

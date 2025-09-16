@@ -14,14 +14,14 @@ def generate_launch_description():
 
     package_name = 'robotic_arm'
 
+    HW_mode = LaunchConfiguration('HW_mode')
     cmd_mode = LaunchConfiguration('cmd_mode')
-    real_time = LaunchConfiguration('real_time')
 
     # launch robot_state_publisher 
     rsp = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             [os.path.join(get_package_share_directory(package_name), 'launch/include' ,'rsp.launch.py')]), 
-            launch_arguments={'cmd_mode': cmd_mode, 'real_time': real_time}.items()
+            launch_arguments={'HW_mode': HW_mode, 'cmd_mode': cmd_mode}.items()
     )
 
     controller_config = os.path.join(
@@ -43,44 +43,26 @@ def generate_launch_description():
         actions={controller_manager}
     )
 
-    # === Spawn velocity controller (if cmd_mode is 'velocity') ===
-    vel_controller_spawner = Node(
+    trajectory_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["velocity_trajectory_controller"],
+        arguments=["trajectory_controller"],
         output="screen",
-        condition=LaunchConfigurationEquals("cmd_mode", "speed")
-    )
-
-    # === Spawn position controller (if cmd_mode is 'position') ===
-    pos_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["position_trajectory_controller"],
-        output="screen",
-        condition=LaunchConfigurationEquals("cmd_mode", "position")
     )
 
     # === Spawn joint state broadcaster ===
     joint_broadcaster_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["joint_broadcaster"],
+        arguments=["joint_state_broadcaster"],
         output="screen",
     )
 
-    # === Register event handlers ===
-    timed_vel_controller_spawner = RegisterEventHandler(
-        event_handler=OnProcessStart(
-            target_action=controller_manager,
-            on_start=[vel_controller_spawner],
-        )
-    )
 
-    timed_pos_controller_spawner = RegisterEventHandler(
+    timed_traj_controller_spawner = RegisterEventHandler(
         event_handler=OnProcessStart(
             target_action=controller_manager,
-            on_start=[pos_controller_spawner],
+            on_start=[trajectory_controller_spawner],
         )
     )
 
@@ -93,20 +75,16 @@ def generate_launch_description():
 
     return LaunchDescription([
         DeclareLaunchArgument(
-            'cmd_mode',
-            default_value='speed',
-            description='choose between position and speed control'
-        ),
-
+            'HW_mode',
+            default_value='mock',
+            description='Options : mock, real, gazebo'),
         DeclareLaunchArgument(
-            'real_time',
-            default_value='true',
-            description='choose between real hardware and mock hardware'
-        ),
+            'cmd_mode',
+            default_value='position',
+            description='choose between position and speed control'),
 
         rsp,
         delay_controller_manager,
-        timed_vel_controller_spawner,
-        timed_pos_controller_spawner,
+        timed_traj_controller_spawner,
         timed_joint_broad_spawner
     ])

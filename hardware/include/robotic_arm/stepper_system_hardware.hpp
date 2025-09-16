@@ -22,19 +22,24 @@
 #include "robotic_arm/Stepper.hpp"
 
 namespace robotic_arm
-{
+{   
+
     class StepperSystemHardware : public hardware_interface::SystemInterface
     {
 
-    struct Config {
-    
-        std::vector<std::string> joint_names;
-        std::vector<double> joint_reductions;
+        struct Config {
+        
+            std::vector<std::string> joint_names;
+            std::vector<double> joint_reductions;
+            std::vector<uint16_t>CAN_id;
 
-        std::string interface_name = "";
-        int CAN_rate = 0;
-        int timout_ms = 0;
-    };
+            std::string interface_name = "";
+            int CAN_rate = 0;
+            int timout_ms = 0;
+            int loop_rate = 0;
+        };
+
+        enum CommandMode { SPEED, POSITION };
 
     public:
         RCLCPP_SHARED_PTR_DEFINITIONS(StepperSystemHardware)
@@ -73,21 +78,34 @@ namespace robotic_arm
         hardware_interface::return_type write(
             const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
+        // ROBOTIC_ARM_PUBLIC
+        // hardware_interface::return_type prepare_command_mode_switch(
+        //     const std::vector<std::string>& start_ifaces, 
+        //     const std::vector<std::string>& stop_ifaces) override;
+
+        // ROBOTIC_ARM_PUBLIC
+        // hardware_interface::return_type perform_command_mode_switch(
+        //     const std::vector<std::string>& start_ifaces, 
+        //     const std::vector<std::string>& stop_ifaces) override;
+
     private:
         
-        // helper function to send differential gearbox commands
-        hardware_interface::return_type differentialPositionCommand();
-        hardware_interface::return_type differentialSpeedCommand();
+        void setCommandMode(CommandMode mode) { 
+            cmd_mode_ = mode;
+        }
 
-        double commands[6][3];
-        double states[6][2];
+        void updateDiffJointStates();
+        double updateDiffMotorCmd(size_t motor_index, size_t cmd_index);
 
         Config cfg_;
         rclcpp::Logger logger_ = rclcpp::get_logger("stepper_system_hardware");  
         CANComms comms_{logger_}; 
 
-        std::vector<StepperMotor> motors;
-        std::string cmd_mode_ = "";
+        std::vector<std::unique_ptr<StepperMotor>> motors;
+        std::vector<std::array<double, 2>> joint_states;   // position, velocity
+        std::vector<std::array<double, 3>> joint_cmds;     // position, velocity, acceleration
+        CommandMode cmd_mode_;
+        CommandMode requested_cmd_mode_;
     };
 }
 

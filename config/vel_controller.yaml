@@ -12,7 +12,7 @@ controller_manager:
 vel_controller:
   ros__parameters:
     joints:
-      - top_base_joint
+      - base_joint
       - shoulder_joint
       - elbow_joint
       - forearm_joint
@@ -22,7 +22,7 @@ vel_controller:
 joint_broadcaster:
   ros__parameters:
     joints:
-      - top_base_joint
+      - base_joint
       - shoulder_joint
       - elbow_joint
       - forearm_joint

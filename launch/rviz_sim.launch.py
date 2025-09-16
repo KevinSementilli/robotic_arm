@@ -13,14 +13,15 @@ def generate_launch_description():
 
     package_name = 'robotic_arm'
 
-    # Declare use_sim_time argument
+    # Launch configuration variables
+    HW_mode = LaunchConfiguration('HW_mode')
     cmd_mode = LaunchConfiguration('cmd_mode')
 
     # Include rsp.launch.py
     rsp = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(
             get_package_share_directory(package_name), 'launch/include', 'rsp.launch.py')),
-        launch_arguments={'cmd_mode': cmd_mode, 'real_time': 'false'}.items()  
+        launch_arguments={'HW_mode' : HW_mode, 'cmd_mode': cmd_mode, }.items()  
     )
 
     # Joint State Publisher GUI Node
@@ -46,9 +47,13 @@ def generate_launch_description():
     # Launch Description
     return LaunchDescription([
         DeclareLaunchArgument(
+            'HW_mode',
+            default_value='mock',
+            description='Options : mock, real, gazebo'),
+        DeclareLaunchArgument(
             'cmd_mode',
-            default_value='speed',
-            description='Choose between position and speed control'),
+            default_value='position',
+            description='choose between position and speed control'),
 
         rsp,
         node_joint_state_publisher_gui,
