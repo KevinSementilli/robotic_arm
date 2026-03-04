@@ -6,6 +6,9 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /PlanningScene1
+        - /PlanningScene1/Scene Robot1
+        - /RobotModel1
       Splitter Ratio: 0.5
     Tree Height: 776
   - Class: rviz_common/Selection
@@ -42,16 +45,64 @@ Visualization Manager:
       Plane Cell Count: 10
       Reference Frame: <Fixed Frame>
       Value: true
+    - Class: rviz_default_plugins/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        bottom_base:
+          Value: true
+        claw_base:
+          Value: true
+        elbow:
+          Value: true
+        forearm:
+          Value: true
+        left_claw:
+          Value: true
+        right_claw:
+          Value: true
+        shoulder:
+          Value: true
+        top_base:
+          Value: true
+        world:
+          Value: true
+        wrist_bevel:
+          Value: true
+        wrist_carrier:
+          Value: true
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: false
+      Tree:
+        world:
+          bottom_base:
+            top_base:
+              shoulder:
+                elbow:
+                  forearm:
+                    wrist_carrier:
+                      wrist_bevel:
+                        claw_base:
+                          left_claw:
+                            {}
+                          right_claw:
+                            {}
+      Update Interval: 0
+      Value: true
     - Class: moveit_rviz_plugin/PlanningScene
       Enabled: true
       Move Group Namespace: ""
       Name: PlanningScene
-      Planning Scene Topic: /servo_node/publish_planning_scene
+      Planning Scene Topic: /monitored_planning_scene
       Robot Description: robot_description
       Scene Geometry:
         Scene Alpha: 0.8999999761581421
         Scene Color: 50; 230; 50
-        Scene Display Time: 0.20000000298023224
+        Scene Display Time: 0.009999999776482582
         Show Scene Geometry: true
         Voxel Coloring: Z-Axis
         Voxel Rendering: Occupied Voxels
@@ -115,26 +166,88 @@ Visualization Manager:
             Value: true
         Robot Alpha: 1
         Show Robot Collision: false
-        Show Robot Visual: true
+        Show Robot Visual: false
       Value: true
-    - Class: rviz_default_plugins/TF
-      Enabled: false
-      Frame Timeout: 15
-      Frames:
-        All Enabled: false
-      Marker Scale: 1
-      Name: TF
-      Show Arrows: true
-      Show Axes: true
-      Show Names: false
-      Tree:
-        {}
+    - Alpha: 1
+      Class: rviz_default_plugins/RobotModel
+      Collision Enabled: false
+      Description File: ""
+      Description Source: Topic
+      Description Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /robot_description
+      Enabled: true
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+        bottom_base:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        claw_base:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        elbow:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        forearm:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_claw:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_claw:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        shoulder:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        top_base:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        wrist_bevel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        wrist_carrier:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+      Mass Properties:
+        Inertia: false
+        Mass: false
+      Name: RobotModel
+      TF Prefix: ""
       Update Interval: 0
-      Value: false
+      Value: true
+      Visual Enabled: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: world
+    Fixed Frame: bottom_base
     Frame Rate: 30
   Name: root
   Tools:
@@ -184,18 +297,18 @@ Visualization Manager:
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.06534630805253983
-        Y: -0.17753754556179047
-        Z: 0.32149651646614075
+        X: 0.042008742690086365
+        Y: -0.0785205215215683
+        Z: 0.2731590270996094
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5003978610038757
+      Pitch: 0.48039788007736206
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.2453970909118652
+      Yaw: 2.315398693084717
     Saved: ~
 Window Geometry:
   Displays:

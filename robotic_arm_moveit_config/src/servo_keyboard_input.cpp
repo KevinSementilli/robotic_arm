@@ -60,7 +60,7 @@
 #define KEYCODE_4 0x34
 #define KEYCODE_5 0x35
 #define KEYCODE_6 0x36
-#define KEYCODE_7 0x37
+// #define KEYCODE_7 0x37
 #define KEYCODE_Q 0x71
 #define KEYCODE_W 0x77
 #define KEYCODE_E 0x65
@@ -70,7 +70,7 @@
 const std::string TWIST_TOPIC = "/servo_node/delta_twist_cmds";
 const std::string JOINT_TOPIC = "/servo_node/delta_joint_cmds";
 const size_t ROS_QUEUE_SIZE = 10;
-const std::string EEF_FRAME_ID = "claw_base";
+const std::string EEF_FRAME_ID = "wrist_bevel";
 const std::string BASE_FRAME_ID = "bottom_base";
 
 // A class for reading the key inputs from the terminal
@@ -178,11 +178,7 @@ int KeyboardServo::keyLoop()
   puts("---------------------------");
   puts("Use arrow keys and the '.' and ';' keys to Cartesian jog");
   puts("Use 'W' to Cartesian jog in the world frame, and 'E' for the End-Effector frame");
-  puts("Joint controls:");
-  puts("1: Base rotation    2: Shoulder    3: Elbow");
-  puts("4: Wrist           5: Forearm");
-  puts("6: Left Gripper    7: Right Gripper");
-  puts("'R' to reverse the direction of jogging");
+  puts("Use 1|2|3|4|5|6|7 keys to joint jog. 'R' to reverse the direction of jogging.");
   puts("'Q' to quit.");
 
   for (;;)
@@ -246,47 +242,47 @@ int KeyboardServo::keyLoop()
         frame_to_publish_ = BASE_FRAME_ID;
         break;
       case KEYCODE_1:
-        RCLCPP_DEBUG(nh_->get_logger(), "1 - Base");
+        RCLCPP_DEBUG(nh_->get_logger(), "1");
         joint_msg->joint_names.push_back("base_joint");
         joint_msg->velocities.push_back(joint_vel_cmd_);
         publish_joint = true;
         break;
       case KEYCODE_2:
-        RCLCPP_DEBUG(nh_->get_logger(), "2 - Shoulder");
+        RCLCPP_DEBUG(nh_->get_logger(), "2");
         joint_msg->joint_names.push_back("shoulder_joint");
         joint_msg->velocities.push_back(joint_vel_cmd_);
         publish_joint = true;
         break;
       case KEYCODE_3:
-        RCLCPP_DEBUG(nh_->get_logger(), "3 - Elbow");
+        RCLCPP_DEBUG(nh_->get_logger(), "3");
         joint_msg->joint_names.push_back("elbow_joint");
         joint_msg->velocities.push_back(joint_vel_cmd_);
         publish_joint = true;
         break;
       case KEYCODE_4:
-        RCLCPP_DEBUG(nh_->get_logger(), "4 - Forearm");
+        RCLCPP_DEBUG(nh_->get_logger(), "4");
         joint_msg->joint_names.push_back("forearm_joint");
         joint_msg->velocities.push_back(joint_vel_cmd_);
         publish_joint = true;
         break;
       case KEYCODE_5:
-        RCLCPP_DEBUG(nh_->get_logger(), "5 - Wrist Carrier");
+        RCLCPP_DEBUG(nh_->get_logger(), "5");
         joint_msg->joint_names.push_back("wrist_carrier_joint");
         joint_msg->velocities.push_back(joint_vel_cmd_);
         publish_joint = true;
         break;
       case KEYCODE_6:
-        RCLCPP_DEBUG(nh_->get_logger(), "6 - Wrist Bevel");
+        RCLCPP_DEBUG(nh_->get_logger(), "6");
         joint_msg->joint_names.push_back("wrist_bevel_joint");
         joint_msg->velocities.push_back(joint_vel_cmd_);
         publish_joint = true;
         break;
-      case KEYCODE_7:
-        RCLCPP_DEBUG(nh_->get_logger(), "7 - Right Claw");
-        joint_msg->joint_names.push_back("right_claw_joint");
-        joint_msg->velocities.push_back(joint_vel_cmd_);
-        publish_joint = true;
-        break;
+      // case KEYCODE_7:
+      //   RCLCPP_DEBUG(nh_->get_logger(), "7");
+      //   joint_msg->joint_names.push_back("wrist_bevel_joint");
+      //   joint_msg->velocities.push_back(joint_vel_cmd_);
+      //   publish_joint = true;
+      //   break;
       case KEYCODE_R:
         RCLCPP_DEBUG(nh_->get_logger(), "R");
         joint_vel_cmd_ *= -1;

@@ -24,3 +24,4 @@ moveit_simple_controller_manager:
       - right_claw_joint
     action_ns: gripper_cmd
     default: true
+    max_effort: 5.0  # N·m — claw stops closing if effort exceeds this

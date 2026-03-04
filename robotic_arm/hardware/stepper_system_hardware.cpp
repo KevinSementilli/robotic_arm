@@ -133,11 +133,11 @@ namespace robotic_arm {
         
         RCLCPP_INFO(logger_, "Activating CAN device: %s, bitrate: %d", cfg_.interface_name.c_str(), cfg_.CAN_rate);
 
-        // while(!comms_.connect(cfg_.interface_name, cfg_.CAN_rate)) {
+        while(!comms_.connect(cfg_.interface_name, cfg_.CAN_rate)) {
 
-        //     RCLCPP_WARN(logger_, "CAN device not connected, retrying ...");
-        //     rclcpp::sleep_for(std::chrono::milliseconds(200));
-        // }
+            RCLCPP_WARN(logger_, "CAN device not connected, retrying ...");
+            rclcpp::sleep_for(std::chrono::milliseconds(200));
+        }
 
         RCLCPP_INFO(logger_, "Attaching motors to CAN bus...");
 
