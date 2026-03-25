@@ -98,7 +98,7 @@ def generate_launch_description():
     # MTC Demo node
     pick_n_place = Node(
         package="robotic_arm_moveit_config",
-        executable="mtc_node",
+        executable="static_pick_place",
         output="screen",
         parameters=[
             moveit_config,

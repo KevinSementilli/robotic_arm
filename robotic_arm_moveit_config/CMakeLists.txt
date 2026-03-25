@@ -11,7 +11,7 @@ find_package(moveit_task_constructor_core REQUIRED)
 # Servo keyboard input node
 add_executable(servo_keyboard_input src/servo_keyboard_input.cpp)
 target_include_directories(servo_keyboard_input PUBLIC include)
-ament_target_dependencies(servo_keyboard_input
+ament_target_dependencies( servo_keyboard_input
   rclcpp
   geometry_msgs
   control_msgs
@@ -24,19 +24,18 @@ install(
 )
 
 # MTC node
-add_executable(mtc_node src/mtc_node.cpp)
-target_include_directories(mtc_node PUBLIC
+add_executable(static_pick_place src/static_pick_place.cpp)
+target_include_directories(static_pick_place PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-target_compile_features(mtc_node PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-ament_target_dependencies(
-  mtc_node
+target_compile_features(static_pick_place PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+ament_target_dependencies( static_pick_place
   "moveit_task_constructor_core"
   "rclcpp"
 )
 
 install(
-  TARGETS mtc_node
+  TARGETS static_pick_place
   DESTINATION lib/${PROJECT_NAME}
 )
 

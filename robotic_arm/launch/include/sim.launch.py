@@ -5,8 +5,9 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.substitutions import LaunchConfiguration
 from launch.actions import DeclareLaunchArgument
+from launch.conditions import IfCondition
+from launch.substitutions import EqualsSubstitution
 from launch_ros.actions import Node
-from launch.conditions import LaunchConfigurationEquals
 
 def generate_launch_description():
 
@@ -24,7 +25,7 @@ def generate_launch_description():
         name='rviz2',
         output='screen',
         arguments=['-d', rviz_config_file],
-        condition=LaunchConfigurationEquals(sim_mode, 'rviz'),
+        condition=IfCondition(EqualsSubstitution(sim_mode, 'rviz')),
     )
 
     node_foxglove = Node(
@@ -32,7 +33,7 @@ def generate_launch_description():
         executable='foxglove_bridge',
         name='foxglove_bridge',
         output='screen',
-        condition=LaunchConfigurationEquals(sim_mode, 'foxglove'),
+        condition=IfCondition(EqualsSubstitution(sim_mode, 'foxglove')),
     )
 
     return LaunchDescription([
