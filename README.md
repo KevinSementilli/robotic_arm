@@ -13,7 +13,7 @@ Robot description and low-level hardware abstraction:
 - hardware plugin (`StepperSystemHardware`)
 - RViz/Gazebo support config
 
-### Launch Files
+#### Launch Files
 
 - `rsp.launch.py`: Starts `robot_state_publisher` from xacro arguments (`HW_mode`, `cmd_mode`). Parameters: `HW_mode:=mock` (options: `mock|real|gazebo`), `cmd_mode:=position`.
 - `rviz_sim.launch.py`: Starts RViz and joint-state-publisher GUI for manual model visualization/testing. Parameters: `HW_mode:=mock` (options: `mock|real|gazebo`), `cmd_mode:=position`.
@@ -28,7 +28,7 @@ Controller-specific runtime configuration:
 - controller manager launch workflows
 - joystick-to-twist teleoperation launch
 
-### Launch Files
+#### Launch Files
 
 - `trajectory_controllers.launch.py`: Starts controller manager and spawns trajectory + joint state controllers. Parameters: `HW_mode:=mock` (options: `mock|real|gazebo`), `cmd_mode:=position`.
 - `vel_controllers.launch.py`: Starts controller manager and spawns velocity-mode controller chain. Parameters: `HW_mode:=mock` (options: `mock|real|gazebo`), `cmd_mode:=position`.
@@ -43,7 +43,7 @@ Owns motion planning and manipulation behavior:
 - servo teleoperation launch
 - C++ executables for keyboard servo and static pick-place task
 
-### Launch Files
+#### Launch Files
 
 - `demo.launch.py`: Standard MoveIt demo bringup (planning + visualization stack). Parameters: none.
 - `move_group.launch.py`: Launches only the MoveIt `move_group` action server. Parameters: none.
@@ -64,7 +64,7 @@ Owns perception and vision streaming:
 - RealSense launch integration
 - depth-fused detections published as ROS topics and JSON stream
 
-### Launch Files
+#### Launch Files
 
 - `robo_arm_vision.launch.py`: Launches YOLO detection node and optionally RealSense driver; publishes annotated image, detections, and enriched JSON output. Parameters: `use_realsense:=true`, `size:=424x240`, `fs:=15`, `hef:=yolov8n.hef`, `stream_fps:=12`, `host:=0.0.0.0`, `port:=5000`, `confidence_threshold:=0.45`, `depth_unit_scale:=0.001`, `color_topic:=/camera/camera/color/image_raw`, `depth_topic:=/camera/camera/aligned_depth_to_color/image_raw`, `annotated_topic:=/camera/color/image_annotated`, `detections_topic:=/detections_2d`, `enriched_topic:=/detections_enriched`.
 - `realsense_glove.launch.py`: Launches RealSense camera and Foxglove bridge for camera stream monitoring. Parameters: `size:=424x240`, `fs:=5`, `enable_depth:=false`, `pointcloud_enable:=false`, `align_depth_enable:=false`, `ip:=0.0.0.0`, `port:=8765`.
