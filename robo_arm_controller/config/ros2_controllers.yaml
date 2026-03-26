@@ -1,0 +1,34 @@
+# ros2_control configuration shared by MoveIt launches
+controller_manager:
+  ros__parameters:
+    update_rate: 100
+
+    robotic_arm_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    claw_controller:
+      type: position_controllers/GripperActionController
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+robotic_arm_controller:
+  ros__parameters:
+    joints:
+      - base_joint
+      - shoulder_joint
+      - elbow_joint
+      - forearm_joint
+      - wrist_carrier_joint
+      - wrist_bevel_joint
+    command_interfaces:
+      - position
+      - velocity
+    state_interfaces:
+      - position
+      - velocity
+
+claw_controller:
+  ros__parameters:
+    joint: right_claw_joint
+    max_effort: 5.0

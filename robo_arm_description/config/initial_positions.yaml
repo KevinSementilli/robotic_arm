@@ -1,0 +1,10 @@
+# Default initial positions for robo_arm_description ros2_control setup
+
+initial_positions:
+  base_joint: 0
+  elbow_joint: 0
+  forearm_joint: 0
+  right_claw_joint: 0
+  shoulder_joint: 0
+  wrist_bevel_joint: 0
+  wrist_carrier_joint: 0
