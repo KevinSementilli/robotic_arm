@@ -1,4 +1,4 @@
-#include "robotic_arm/stepper_system_hardware.hpp"
+#include "robo_arm/stepper_system_hardware.hpp"
 
 #include <chrono>
 #include <cmath>
@@ -9,13 +9,13 @@
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/rclcpp.hpp"
 
-namespace robotic_arm {
+namespace robo_arm {
 
     hardware_interface::CallbackReturn StepperSystemHardware::on_init(
-        const hardware_interface::HardwareInfo & info) {
-        
+        const hardware_interface::HardwareComponentInterfaceParams & params) {
+
         if (
-            hardware_interface::SystemInterface::on_init(info) !=
+            hardware_interface::SystemInterface::on_init(params) !=
             hardware_interface::CallbackReturn::SUCCESS)
         {
             RCLCPP_ERROR(logger_, "info Failed!");
@@ -400,8 +400,8 @@ namespace robotic_arm {
     //     return hardware_interface::return_type::OK;
     // }
 
-} // namespace robotic_arm
+} // namespace robo_arm
 
 #include "pluginlib/class_list_macros.hpp"
 PLUGINLIB_EXPORT_CLASS(
-  robotic_arm::StepperSystemHardware, hardware_interface::SystemInterface)
+  robo_arm::StepperSystemHardware, hardware_interface::SystemInterface)

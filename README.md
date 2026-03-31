@@ -68,3 +68,9 @@ Owns perception and vision streaming:
 
 - `robo_arm_vision.launch.py`: Launches YOLO detection node and optionally RealSense driver; publishes annotated image, detections, and enriched JSON output. Parameters: `use_realsense:=true`, `size:=424x240`, `fs:=15`, `hef:=yolov8n.hef`, `stream_fps:=12`, `host:=0.0.0.0`, `port:=5000`, `confidence_threshold:=0.45`, `depth_unit_scale:=0.001`, `color_topic:=/camera/camera/color/image_raw`, `depth_topic:=/camera/camera/aligned_depth_to_color/image_raw`, `annotated_topic:=/camera/color/image_annotated`, `detections_topic:=/detections_2d`, `enriched_topic:=/detections_enriched`.
 - `realsense_glove.launch.py`: Launches RealSense camera and Foxglove bridge for camera stream monitoring. Parameters: `size:=424x240`, `fs:=5`, `enable_depth:=false`, `pointcloud_enable:=false`, `align_depth_enable:=false`, `ip:=0.0.0.0`, `port:=8765`.
+
+## TODO
+
+1. adapt octomap to track camera imu
+2. develop hardware accelerated yolo object detection
+3. Integrate object detection with planning scene generation

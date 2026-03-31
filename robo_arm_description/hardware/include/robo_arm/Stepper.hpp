@@ -1,5 +1,5 @@
-#ifndef ROBOTIC_ARM_STEPPER_HPP
-#define ROBOTIC_ARM_STEPPER_HPP
+#ifndef robo_arm_STEPPER_HPP
+#define robo_arm_STEPPER_HPP
 
 #include "CAN_Comms.hpp"
 #include <cstdint>
@@ -132,4 +132,4 @@ private:
     rclcpp::Logger logger_;
 };
 
-#endif // ROBOTIC_ARM_STEPPER_HPP
+#endif // robo_arm_STEPPER_HPP

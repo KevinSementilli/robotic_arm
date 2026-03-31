@@ -17,7 +17,7 @@ def generate_launch_description():
         "robot.urdf.xacro",
     )
     moveit_config = (
-        MoveItConfigsBuilder("robotic_arm", package_name="robo_arm_moveit")
+        MoveItConfigsBuilder("robo_arm", package_name="robo_arm_moveit")
         .planning_pipelines(pipelines=["ompl"])
         .robot_description(file_path=robot_description_path)
         .trajectory_execution(file_path="config/moveit_controllers.yaml")
@@ -90,7 +90,7 @@ def generate_launch_description():
     # Load controllers
     load_controllers = []
     for controller in [
-        "robotic_arm_controller",
+        "robo_arm_controller",
         "claw_controller",
         "joint_state_broadcaster",
     ]:

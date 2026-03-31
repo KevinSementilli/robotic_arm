@@ -4,7 +4,7 @@
   <name>robo_arm_moveit</name>
   <version>0.3.0</version>
   <description>
-     An automatically generated package with all the configuration and launch files for using the robotic_arm with the MoveIt Motion Planning Framework
+     An automatically generated package with all the configuration and launch files for using the robo_arm with the MoveIt Motion Planning Framework
   </description>
   <maintainer email="kseme@email.com">kseme</maintainer>
 
@@ -47,6 +47,11 @@
   <exec_depend>tf2_ros</exec_depend>
   <exec_depend>warehouse_ros_mongo</exec_depend>
   <exec_depend>xacro</exec_depend>
+
+  <!-- Perception dependencies -->
+  <exec_depend>realsense2_camera</exec_depend>
+  <exec_depend>realsense2_description</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
 
   <!-- Local dependencies -->
   <exec_depend>robo_arm_description</exec_depend>

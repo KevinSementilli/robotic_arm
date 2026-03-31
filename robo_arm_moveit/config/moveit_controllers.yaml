@@ -4,10 +4,10 @@ moveit_controller_manager: moveit_simple_controller_manager/MoveItSimpleControll
 
 moveit_simple_controller_manager:
   controller_names:
-    - robotic_arm_controller
+    - robo_arm_controller
     - claw_controller
 
-  robotic_arm_controller:
+  robo_arm_controller:
     type: FollowJointTrajectory
     joints:
       - base_joint

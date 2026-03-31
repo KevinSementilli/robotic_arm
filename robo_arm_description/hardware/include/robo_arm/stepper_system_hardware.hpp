@@ -1,5 +1,5 @@
-#ifndef ROBOTIC_ARM_STEPPER_SYSTEM_HARDWARE_HPP_
-#define ROBOTIC_ARM_STEPPER_SYSTEM_HARDWARE_HPP_
+#ifndef ROBO_ARM_STEPPER_SYSTEM_HARDWARE_HPP_
+#define ROBO_ARM_STEPPER_SYSTEM_HARDWARE_HPP_
 
 #include <memory>
 #include <string>
@@ -17,11 +17,11 @@
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 #include "rclcpp_lifecycle/state.hpp"
 
-#include "robotic_arm/visibility_control.h"
-#include "robotic_arm/CAN_Comms.hpp"
-#include "robotic_arm/Stepper.hpp"
+#include "robo_arm/visibility_control.h"
+#include "robo_arm/CAN_Comms.hpp"
+#include "robo_arm/Stepper.hpp"
 
-namespace robotic_arm
+namespace robo_arm
 {   
 
     class StepperSystemHardware : public hardware_interface::SystemInterface
@@ -44,46 +44,46 @@ namespace robotic_arm
     public:
         RCLCPP_SHARED_PTR_DEFINITIONS(StepperSystemHardware)
 
-        ROBOTIC_ARM_PUBLIC
+        robo_arm_PUBLIC
         hardware_interface::CallbackReturn on_init(
-            const hardware_interface::HardwareInfo & info) override;
+            const hardware_interface::HardwareComponentInterfaceParams & params) override;
 
-        ROBOTIC_ARM_PUBLIC
+        robo_arm_PUBLIC
         hardware_interface::CallbackReturn on_configure(
             const rclcpp_lifecycle::State & previous_state);
 
-        // ROBOTIC_ARM_PUBLIC
+        // robo_arm_PUBLIC
         // hardware_interface::CallbackReturn on_cleanup(
         //     const rclcpp_lifecycle::State & previous_state);
 
-        ROBOTIC_ARM_PUBLIC
+        robo_arm_PUBLIC
         std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
 
-        ROBOTIC_ARM_PUBLIC
+        robo_arm_PUBLIC
         std::vector<hardware_interface::CommandInterface> export_command_interfaces() override;
 
-        ROBOTIC_ARM_PUBLIC
+        robo_arm_PUBLIC
         hardware_interface::CallbackReturn on_activate(
             const rclcpp_lifecycle::State & previous_state) override;
 
-        ROBOTIC_ARM_PUBLIC
+        robo_arm_PUBLIC
         hardware_interface::CallbackReturn on_deactivate(
             const rclcpp_lifecycle::State & previous_state) override;
 
-        ROBOTIC_ARM_PUBLIC
+        robo_arm_PUBLIC
         hardware_interface::return_type read(
             const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
-        ROBOTIC_ARM_PUBLIC
+        robo_arm_PUBLIC
         hardware_interface::return_type write(
             const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
-        // ROBOTIC_ARM_PUBLIC
+        // robo_arm_PUBLIC
         // hardware_interface::return_type prepare_command_mode_switch(
         //     const std::vector<std::string>& start_ifaces, 
         //     const std::vector<std::string>& stop_ifaces) override;
 
-        // ROBOTIC_ARM_PUBLIC
+        // robo_arm_PUBLIC
         // hardware_interface::return_type perform_command_mode_switch(
         //     const std::vector<std::string>& start_ifaces, 
         //     const std::vector<std::string>& stop_ifaces) override;
@@ -109,4 +109,4 @@ namespace robotic_arm
     };
 }
 
-#endif  // ROBOTIC_ARM_STEPPER_SYSTEM_HARDWARE_HPP_
+#endif  // ROBO_ARM_STEPPER_SYSTEM_HARDWARE_HPP_

@@ -3,7 +3,7 @@ moveit_setup_assistant_config:
     package: robo_arm_description
     relative_path: urdf/robot.urdf.xacro
   srdf:
-    relative_path: config/robotic_arm.srdf
+    relative_path: config/robo_arm.srdf
   package_settings:
     author_name: kseme
     author_email: kseme@email.com

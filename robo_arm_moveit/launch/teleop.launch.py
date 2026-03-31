@@ -26,7 +26,7 @@ def generate_launch_description():
         "robot.urdf.xacro",
     )
     moveit_config = (
-        MoveItConfigsBuilder("robotic_arm", package_name="robo_arm_moveit")
+        MoveItConfigsBuilder("robo_arm", package_name="robo_arm_moveit")
         .robot_description(file_path=robot_description_path)
         .to_moveit_configs()
     )
@@ -80,7 +80,7 @@ def generate_launch_description():
     panda_arm_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["robotic_arm_controller", "-c", "/controller_manager"],
+        arguments=["robo_arm_controller", "-c", "/controller_manager"],
     )
 
     # Launch as much as possible in components

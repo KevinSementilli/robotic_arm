@@ -47,7 +47,7 @@ ament_target_dependencies(
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE "ROBOTIC_ARM_BUILDING_DLL")
+target_compile_definitions(${PROJECT_NAME} PRIVATE "robo_arm_BUILDING_DLL")
 
 # Export hardware interface as a plugin
 pluginlib_export_plugin_description_file(hardware_interface ${PROJECT_NAME}.xml)

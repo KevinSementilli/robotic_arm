@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <library path="robo_arm_description">
   <class name="robo_arm_description/StepperSystemHardware"
-         type="robotic_arm::StepperSystemHardware"
+         type="robo_arm::StepperSystemHardware"
          base_class_type="hardware_interface::SystemInterface">
     <description>
       Made for a gear differential 2 DOF robotic arm with stepper motors communicating to the controller via CANbus.
