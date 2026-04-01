@@ -6,6 +6,8 @@
     <xacro:arg name="initial_positions_file" default="$(find robo_arm_description)/config/initial_positions.yaml"/>
 
     <xacro:include filename="robot_core.xacro"/>
+    <xacro:include filename="camera.xacro"/>
+
     <xacro:include filename="gazebo.xacro"/>
     <xacro:include filename="ros2_control.xacro"/>
 

@@ -12,7 +12,7 @@ setup(
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/launch', ['launch/robo_arm_vision.launch.py', 'launch/realsense_glove.launch.py']),
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools', 'ultralytics'],
     zip_safe=True,
     maintainer='pitorch',
     maintainer_email='pitorch@todo.todo',

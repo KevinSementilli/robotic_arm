@@ -7,6 +7,13 @@ from ament_index_python.packages import get_package_share_directory
 def generate_launch_description():
     moveit_config = (
         MoveItConfigsBuilder("robo_arm", package_name="robo_arm_moveit")
+        .robot_description(
+            file_path=os.path.join(
+                get_package_share_directory("robo_arm_description"),
+                "urdf",
+                "robot.urdf.xacro"
+            )
+        )
         .robot_description_semantic(
             file_path=os.path.join(
                 get_package_share_directory("robo_arm_moveit"),

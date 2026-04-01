@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- Main camera link with visual/collision -->
+    <link name="camera_link">
+        <visual>
+            <origin xyz="0 0 0.025"/>
+            <geometry>
+                <mesh filename="package://robo_arm_description/meshes/realsense_D455.stl" scale="${scale_factor}"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0.025"/>
+            <geometry>
+                <mesh filename="package://robo_arm_description/meshes/realsense_D455.stl" scale="${scale_factor}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Attach camera to claw_base -->
+    <joint name="camera_joint" type="fixed">
+        <parent link="claw_base"/>
+        <child link="camera_link"/>
+        <origin xyz="0 -0.04 0.005" rpy="0 0 0"/>
+    </joint>
+
+    <link name="camera_depth_frame"/>
+    <joint name="camera_depth_joint" type="fixed">
+        <parent link="camera_link"/>
+        <child link="camera_depth_frame"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <link name="camera_depth_optical_frame"/>
+    <joint name="camera_depth_optical_joint" type="fixed">
+        <parent link="camera_depth_frame"/>
+        <child link="camera_depth_optical_frame"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <link name="camera_color_frame"/>
+    <joint name="camera_color_joint" type="fixed">
+        <parent link="camera_link"/>
+        <child link="camera_color_frame"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <link name="camera_color_optical_frame"/>
+    <joint name="camera_color_optical_joint" type="fixed">
+        <parent link="camera_color_frame"/>
+        <child link="camera_color_optical_frame"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+</robot>
