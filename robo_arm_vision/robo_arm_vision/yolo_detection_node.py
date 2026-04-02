@@ -16,7 +16,6 @@ from vision_msgs.msg import (
     ObjectHypothesisWithPose,
 )
 
-
 class YoloDetectionNode(Node):
     def __init__(self) -> None:
         super().__init__("robo_arm_vision_node")

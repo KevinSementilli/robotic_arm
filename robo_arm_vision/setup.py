@@ -10,9 +10,9 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        ('share/' + package_name + '/launch', ['launch/robo_arm_vision.launch.py', 'launch/realsense_glove.launch.py']),
+        ('share/' + package_name + '/launch', ['launch/robo_arm_vision.launch.py', 'launch/realsense_glove.launch.py', 'launch/yolo_detection_3d.launch.py']),
     ],
-    install_requires=['setuptools', 'ultralytics'],
+    install_requires=['setuptools', 'numpy<2', 'opencv-python<4.13', 'ultralytics'],
     zip_safe=True,
     maintainer='pitorch',
     maintainer_email='pitorch@todo.todo',
@@ -26,9 +26,7 @@ setup(
     entry_points={
         'console_scripts': [
             'robo_arm_vision_node = robo_arm_vision.yolo_detection_node:main',
-            'yolo_moveit_bridge = robo_arm_vision.yolo_moveit_bridge:main',
-            'perception_diagnostic = robo_arm_vision.perception_diagnostic:main',
-            'test_planning_scene = robo_arm_vision.test_planning_scene:main',
+            'yolo_detection_3d_node = robo_arm_vision.yolo_detection_3d_node:main',
         ],
     },
 )

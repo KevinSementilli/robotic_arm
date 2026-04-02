@@ -1,0 +1,3 @@
+# Empty sensors configuration - no octomap sensors for detection_scene.launch
+# Use octomap_planning_scene.launch for octomap-based planning
+sensors: []

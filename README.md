@@ -64,6 +64,12 @@ Owns perception and vision streaming:
 - RealSense launch integration
 - depth-fused detections published as ROS topics and JSON stream
 
+#### Setup 
+
+- create  venv : `python3 -m venv .venv`
+- source venv : `source .venv/bin/activate`
+
+
 #### Launch Files
 
 - `robo_arm_vision.launch.py`: Launches YOLO detection node and optionally RealSense driver; publishes annotated image, detections, and enriched JSON output. Parameters: `use_realsense:=true`, `size:=424x240`, `fs:=15`, `hef:=yolov8n.hef`, `stream_fps:=12`, `host:=0.0.0.0`, `port:=5000`, `confidence_threshold:=0.45`, `depth_unit_scale:=0.001`, `color_topic:=/camera/camera/color/image_raw`, `depth_topic:=/camera/camera/aligned_depth_to_color/image_raw`, `annotated_topic:=/camera/color/image_annotated`, `detections_topic:=/detections_2d`, `enriched_topic:=/detections_enriched`.

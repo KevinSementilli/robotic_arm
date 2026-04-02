@@ -6,6 +6,13 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
+import os
+
+# Virtual environment site-packages path
+VENV_SITE_PACKAGES = os.path.expanduser(
+    "~/projects/robo_arm_ws/.venv/lib/python3.12/site-packages"
+)
+
 
 def generate_launch_description():
     use_realsense = LaunchConfiguration("use_realsense")
@@ -26,13 +33,12 @@ def generate_launch_description():
         condition=IfCondition(use_realsense),
         launch_arguments={
             "rgb_camera.color_profile": profile,
-            "depth_module.depth_profile": profile,
-            "depth_module.infra_profile": profile,
-            "enable_depth": "true",
-            "pointcloud.enable": "true",
-            "align_depth.enable": "true",
         }.items(),
     )
+
+    # Build PYTHONPATH with venv site-packages prepended
+    existing_pythonpath = os.environ.get("PYTHONPATH", "")
+    venv_pythonpath = f"{VENV_SITE_PACKAGES}:{existing_pythonpath}" if existing_pythonpath else VENV_SITE_PACKAGES
 
     yolo_node = Node(
         package="robo_arm_vision",
@@ -48,12 +54,13 @@ def generate_launch_description():
             "annotated_topic": annotated_topic,
             "detections_topic": detections_topic,
         }],
+        additional_env={"PYTHONPATH": venv_pythonpath},
     )
 
     return LaunchDescription([
         DeclareLaunchArgument("use_realsense", default_value="true", description="Launch realsense2_camera"),
         DeclareLaunchArgument("size", default_value="424x240", description="Frame size as WIDTHxHEIGHT"),
-        DeclareLaunchArgument("fs", default_value="15", description="Frame rate (fps)"),
+        DeclareLaunchArgument("fs", default_value="5", description="Frame rate (fps)"),
         DeclareLaunchArgument("model_path", default_value="yolov8n.pt", description="Ultralytics model path (.pt)"),
         DeclareLaunchArgument("device", default_value="cpu", description="Ultralytics device, e.g. cpu or 0"),
         DeclareLaunchArgument("input_size", default_value="640", description="Model inference image size"),
